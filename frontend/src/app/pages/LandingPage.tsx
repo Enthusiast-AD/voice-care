@@ -131,64 +131,46 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/90 text-white pt-32 pb-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/90 text-white pt-32 pb-40">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl"></div>
         </div>
 
-        <div className="container mx-auto px-2 relative z-10">
+        <div className="container mx-auto px-6 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             <div className="space-y-8">
               {/* Heading */}
-              <div>
-                <h1 className="text-5xl md:text-6xl mb-6 leading-tight">
+              <div className="max-w-xl">
+                <h1 className="text-5xl md:text-6xl mb-6 font-bold leading-tight">
                   One Call.
                   <br />
                   One Conversation.
                   <br />
                   <span className="text-accent">A Life Saved.</span>
                 </h1>
-                <p className="text-xl md:text-2xl mb-4 text-white/90 leading-relaxed">
+                <p className="text-xl md:text-2xl mb-8 text-white/90 leading-relaxed">
                   AI-powered multilingual voice assistant for post-discharge
                   patient care
                 </p>
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 relative z-20">
                 <Link
                   to="/dashboard"
-                  className="bg-accent text-accent-foreground px-8 py-4 rounded-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2 group"
+                  className="bg-accent text-accent-foreground px-8 py-4 rounded-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2 group shadow-xl shadow-black/10"
                 >
                   <span className="font-medium">Explore Dashboard</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
                   to="/admin"
-                  className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg hover:bg-white/20 transition-all border border-white/30 flex items-center justify-center gap-2"
+                  className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg hover:bg-white/20 transition-all border border-white/30 flex items-center justify-center gap-2 hover:shadow-lg"
                 >
                   <span className="font-medium">Admin Access</span>
                 </Link>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/20">
-                <div>
-                  <div className="text-3xl font-semibold text-accent">
-                    300M+
-                  </div>
-                  <div className="text-sm text-white/70">Patients Annually</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-semibold text-accent">12+</div>
-                  <div className="text-sm text-white/70">Languages</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-semibold text-accent">24/7</div>
-                  <div className="text-sm text-white/70">Monitoring</div>
-                </div>
               </div>
             </div>
 
@@ -210,7 +192,7 @@ export default function LandingPage() {
                 <div className="absolute -top-6 -right-6 bg-accent text-accent-foreground px-4 py-2 rounded-lg shadow-lg text-sm font-medium">
                   AI Powered
                 </div>
-                <div className="absolute -bottom-6 -left-6 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/30 text-sm">
+                <div className="absolute -bottom-6 -left-6 bg-accent text-accent-foreground px-4 py-2 rounded-lg shadow-lg text-sm font-medium">
                   Multilingual Support
                 </div>
               </div>
@@ -218,15 +200,17 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Wave decoration */}
-        <div className="absolute bottom-0 left-0 right-0">
+        {/* Wave decoration - adjusted to overlap more naturally */}
+        <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-[0]">
           <svg
-            viewBox="0 0 1440 120"
+            viewBox="0 0 1440 320"
             fill="none"
+            className="w-full relative h-[120px] md:h-[200px]"
             xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
           >
             <path
-              d="M0 0L60 10C120 20 240 40 360 46.7C480 53 600 47 720 43.3C840 40 960 40 1080 46.7C1200 53 1320 67 1380 73.3L1440 80V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V0Z"
+              d="M0 64L48 85.3C96 107 192 149 288 154.7C384 160 480 128 576 128C672 128 768 160 864 160C960 160 1056 128 1152 112C1248 96 1344 96 1392 96L1440 96V320H1392C1344 320 1248 320 1152 320C1056 320 960 320 864 320C768 320 672 320 576 320C480 320 384 320 288 320C192 320 96 320 48 320H0V64Z"
               fill="#f5f9f8"
             />
           </svg>
@@ -266,6 +250,32 @@ export default function LandingPage() {
               <p className="text-muted-foreground">
                 Hospital outpatient visits annually in India
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Bar */}
+      <section className="py-12 bg-primary">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center items-center">
+            <div>
+              <div className="text-4xl md:text-5xl font-bold text-accent mb-2">
+                300M+
+              </div>
+              <p className="text-white/80 text-lg">Patients Annually</p>
+            </div>
+            <div>
+              <div className="text-4xl md:text-5xl font-bold text-accent mb-2">
+                12+
+              </div>
+              <p className="text-white/80 text-lg">Languages Supported</p>
+            </div>
+            <div>
+              <div className="text-4xl md:text-5xl font-bold text-accent mb-2">
+                24/7
+              </div>
+              <p className="text-white/80 text-lg">AI Monitoring</p>
             </div>
           </div>
         </div>
@@ -401,43 +411,57 @@ export default function LandingPage() {
                 <div>
                   <div className="flex justify-between mb-2">
                     <span className="text-muted-foreground">
-                      Readmission Reduction
+                      Avoidable Complications
                     </span>
-                    <span className="text-primary">20-40%</span>
+                    <span className="text-primary">15-25% Reduction</span>
                   </div>
                   <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent w-[30%]"></div>
+                    <div className="h-full bg-accent w-[25%]"></div>
                   </div>
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
                     <span className="text-muted-foreground">
-                      Early Detection Rate
+                      Symptom Detection Accuracy
                     </span>
-                    <span className="text-primary">85%</span>
+                    <span className="text-primary">94%</span>
                   </div>
                   <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent w-[85%]"></div>
+                    <div className="h-full bg-accent w-[94%]"></div>
                   </div>
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
                     <span className="text-muted-foreground">
-                      Patient Satisfaction
+                      Patient Engagement Rate
                     </span>
-                    <span className="text-primary">92%</span>
+                    <span className="text-primary">88%</span>
                   </div>
                   <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent w-[92%]"></div>
+                    <div className="h-full bg-accent w-[88%]"></div>
                   </div>
                 </div>
-              </div>
-              <div className="mt-8 pt-6 border-t border-border">
-                <div className="text-center">
-                  <div className="text-3xl text-primary mb-2">₹5-10</div>
-                  <p className="text-sm text-muted-foreground">
-                    Cost per AI follow-up call
-                  </p>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-muted-foreground">
+                      Clinician Time Saved
+                    </span>
+                    <span className="text-primary">20+ Hours/Week</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <div className="h-full bg-accent w-[75%]"></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-muted-foreground">
+                      Follow-up Completion
+                    </span>
+                    <span className="text-primary">96%</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <div className="h-full bg-accent w-[96%]"></div>
+                  </div>
                 </div>
               </div>
             </div>
