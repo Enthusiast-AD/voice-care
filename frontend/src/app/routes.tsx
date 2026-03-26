@@ -1,13 +1,17 @@
 import { createBrowserRouter } from "react-router";
-import { LandingPage } from "./pages/LandingPage";
-import { DoctorDashboard } from "./pages/DoctorDashboard";
-import { PatientList } from "./pages/PatientList";
-import { PatientDetail } from "./pages/PatientDetail";
-import { Alerts } from "./pages/Alerts";
-import { Schedule } from "./pages/Schedule";
-import { AdminPanel } from "./pages/AdminPanel";
+import LandingPage from "./pages/LandingPage";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import Dashboard from "./pages/Dashboard";
+import Patients from "./pages/Patients";
+import PatientDetail from "./pages/PatientDetail";
+import Alerts from "./pages/Alerts";
+import Schedule from "./pages/Schedule";
+import CallLogs from "./pages/CallLogs";
+import Settings from "./pages/Settings";
+import AdminPanel from "./pages/AdminPanel";
 import { NotFound } from "./pages/NotFound";
-import { DashboardLayout } from "./components/DashboardLayout";
+import DashboardLayout from "./components/DashboardLayout";
 
 export const router = createBrowserRouter([
   {
@@ -15,16 +19,29 @@ export const router = createBrowserRouter([
     element: <LandingPage />,
   },
   {
+    path: "/signin",
+    element: <SignIn />,
+  },
+  {
+    path: "/signup",
+    element: <SignUp />,
+  },
+  {
     path: "/dashboard",
     element: <DashboardLayout />,
     children: [
-      { index: true, element: <DoctorDashboard /> },
-      { path: "patients", element: <PatientList /> },
+      { index: true, element: <Dashboard /> },
+      { path: "patients", element: <Patients /> },
       { path: "patients/:id", element: <PatientDetail /> },
       { path: "alerts", element: <Alerts /> },
       { path: "schedule", element: <Schedule /> },
-      { path: "admin", element: <AdminPanel /> },
+      { path: "calls", element: <CallLogs /> },
+      { path: "settings", element: <Settings /> },
     ],
+  },
+  {
+    path: "/admin",
+    element: <AdminPanel />,
   },
   {
     path: "*",

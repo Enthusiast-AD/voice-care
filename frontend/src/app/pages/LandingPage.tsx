@@ -61,18 +61,18 @@ export default function LandingPage() {
               >
                 Impact
               </a>
-              <div className="flex items-center gap-3 ml-4">
+              <div className="flex items-center gap-3 ml-4 relative z-50">
                 <Link
-                  to="/dashboard"
-                  className="text-primary hover:text-primary/80 transition-colors px-4 py-2"
+                  to="/signin"
+                  className="text-primary hover:text-primary/80 transition-colors px-4 py-2 font-medium relative z-50"
                 >
                   Doctor Login
                 </Link>
                 <Link
-                  to="/admin"
-                  className="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-colors"
+                  to="/signup"
+                  className="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-all shadow-md shadow-primary/10 hover:shadow-primary/20 hover:scale-[1.02] relative z-50"
                 >
-                  Admin Panel
+                  Sign Up
                 </Link>
               </div>
             </div>
@@ -113,16 +113,16 @@ export default function LandingPage() {
                   Impact
                 </a>
                 <Link
-                  to="/dashboard"
-                  className="text-primary hover:text-primary/80 transition-colors py-2"
+                  to="/signin"
+                  className="text-primary hover:text-primary/80 transition-colors py-2 font-medium"
                 >
                   Doctor Login
                 </Link>
                 <Link
-                  to="/admin"
-                  className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors text-center"
+                  to="/signup"
+                  className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors text-center font-medium shadow-sm"
                 >
-                  Admin Panel
+                  Sign Up
                 </Link>
               </div>
             </div>
@@ -156,20 +156,19 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 relative z-20">
+              <div className="flex flex-col sm:flex-row gap-4 relative z-50">
                 <Link
-                  to="/dashboard"
-                  className="bg-accent text-accent-foreground px-8 py-4 rounded-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2 group shadow-xl shadow-black/10"
+                  to="/signup"
+                  className="bg-accent text-accent-foreground px-8 py-4 rounded-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2 group shadow-xl shadow-black/10 relative z-50"
                 >
-                  <span className="font-medium">Explore Dashboard</span>
+                  <span className="font-semibold">Register Your Hospital</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                  to="/admin"
-                  className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg hover:bg-white/20 transition-all border border-white/30 flex items-center justify-center gap-2 hover:shadow-lg"
+                  to="/signin"
+                  className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg hover:bg-white/20 transition-all border border-white/30 flex items-center justify-center gap-2 hover:shadow-lg relative z-50"
                 >
-                  <span className="font-medium">Admin Access</span>
+                  <span className="font-semibold text-white">Sign In</span>
                 </Link>
               </div>
             </div>
@@ -232,24 +231,33 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-card p-8 rounded-xl shadow-lg border border-border">
-              <div className="text-5xl mb-4 text-primary">15-25%</div>
-              <p className="text-muted-foreground">
-                of cardiac and surgical patients experience avoidable
-                post-discharge complications
-              </p>
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
+              <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+              <div className="relative">
+                <div className="text-5xl mb-4 text-primary">15-25%</div>
+                <p className="text-muted-foreground">
+                  of cardiac and surgical patients experience avoidable
+                  post-discharge complications
+                </p>
+              </div>
             </div>
-            <div className="bg-card p-8 rounded-xl shadow-lg border border-border">
-              <div className="text-5xl mb-4 text-primary">1:1445</div>
-              <p className="text-muted-foreground">
-                Doctor to patient ratio in India vs WHO-recommended 1:1000
-              </p>
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
+              <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+              <div className="relative">
+                <div className="text-5xl mb-4 text-primary">1:1445</div>
+                <p className="text-muted-foreground">
+                  Doctor to patient ratio in India vs WHO-recommended 1:1000
+                </p>
+              </div>
             </div>
-            <div className="bg-card p-8 rounded-xl shadow-lg border border-border">
-              <div className="text-5xl mb-4 text-primary">300M+</div>
-              <p className="text-muted-foreground">
-                Hospital outpatient visits annually in India
-              </p>
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
+              <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+              <div className="relative">
+                <div className="text-5xl mb-4 text-primary">300M+</div>
+                <p className="text-muted-foreground">
+                  Hospital outpatient visits annually in India
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -292,7 +300,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30">
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
               <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
               <div className="relative">
                 <div className="mb-5 inline-flex items-center justify-center rounded-xl border border-border/60 bg-background/40 p-3 shadow-sm transition-transform duration-300 group-hover:scale-[1.03]">
@@ -307,7 +315,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30">
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
               <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
               <div className="relative">
                 <div className="mb-5 inline-flex items-center justify-center rounded-xl border border-border/60 bg-background/40 p-3 shadow-sm transition-transform duration-300 group-hover:scale-[1.03]">
@@ -322,7 +330,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30">
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
               <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
               <div className="relative">
                 <div className="mb-5 inline-flex items-center justify-center rounded-xl border border-border/60 bg-background/40 p-3 shadow-sm transition-transform duration-300 group-hover:scale-[1.03]">
@@ -335,7 +343,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30">
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
               <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
               <div className="relative">
                 <div className="mb-5 inline-flex items-center justify-center rounded-xl border border-border/60 bg-background/40 p-3 shadow-sm transition-transform duration-300 group-hover:scale-[1.03]">
@@ -349,7 +357,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30">
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
               <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
               <div className="relative">
                 <div className="mb-5 inline-flex items-center justify-center rounded-xl border border-border/60 bg-background/40 p-3 shadow-sm transition-transform duration-300 group-hover:scale-[1.03]">
@@ -362,7 +370,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30">
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
               <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
               <div className="relative">
                 <div className="mb-5 inline-flex items-center justify-center rounded-xl border border-border/60 bg-background/40 p-3 shadow-sm transition-transform duration-300 group-hover:scale-[1.03]">
@@ -435,62 +443,65 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="bg-card p-8 rounded-xl shadow-lg border border-border">
-              <h3 className="text-2xl mb-6 text-primary">Impact Metrics</h3>
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-muted-foreground">
-                      Avoidable Complications
-                    </span>
-                    <span className="text-primary">15-25% Reduction</span>
+            <div className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40">
+              <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+              <div className="relative">
+                <h3 className="text-2xl mb-6 text-primary">Impact Metrics</h3>
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-muted-foreground">
+                        Avoidable Complications
+                      </span>
+                      <span className="text-primary">15-25% Reduction</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-accent w-[25%]"></div>
+                    </div>
                   </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent w-[25%]"></div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-muted-foreground">
+                        Symptom Detection Accuracy
+                      </span>
+                      <span className="text-primary">94%</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-accent w-[94%]"></div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-muted-foreground">
-                      Symptom Detection Accuracy
-                    </span>
-                    <span className="text-primary">94%</span>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-muted-foreground">
+                        Patient Engagement Rate
+                      </span>
+                      <span className="text-primary">88%</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-accent w-[88%]"></div>
+                    </div>
                   </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent w-[94%]"></div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-muted-foreground">
+                        Clinician Time Saved
+                      </span>
+                      <span className="text-primary">20+ Hours/Week</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-accent w-[75%]"></div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-muted-foreground">
-                      Patient Engagement Rate
-                    </span>
-                    <span className="text-primary">88%</span>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent w-[88%]"></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-muted-foreground">
-                      Clinician Time Saved
-                    </span>
-                    <span className="text-primary">20+ Hours/Week</span>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent w-[75%]"></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-muted-foreground">
-                      Follow-up Completion
-                    </span>
-                    <span className="text-primary">96%</span>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent w-[96%]"></div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-muted-foreground">
+                        Follow-up Completion
+                      </span>
+                      <span className="text-primary">96%</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-accent w-[96%]"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -511,16 +522,16 @@ export default function LandingPage() {
           </p>
           <div className="flex gap-4 justify-center">
             <Link
-              to="/dashboard"
-              className="bg-accent text-accent-foreground px-8 py-4 rounded-lg hover:bg-accent/90 transition-colors"
+              to="/signup"
+              className="bg-accent text-accent-foreground px-8 py-4 rounded-lg hover:bg-accent/90 transition-all hover:scale-105 shadow-lg shadow-black/10 font-semibold"
             >
-              View Doctor Dashboard
+              Get Started for Free
             </Link>
             <Link
-              to="/admin"
-              className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg hover:bg-white/20 transition-colors border border-white/30"
+              to="/signin"
+              className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg hover:bg-white/20 transition-colors border border-white/30 font-semibold"
             >
-              Access Admin Panel
+              Sign In to Dashboard
             </Link>
           </div>
         </div>
