@@ -1,18 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card";
-import { getDashboardStats, mockAlerts, mockPatients, getRiskColor } from "../data/mockData";
+import { mockAlerts, getRiskColor } from "../data/mockData";
+import { usePatients } from "../data/usePatients";
 import { Users, AlertTriangle, Phone, TrendingUp, Clock, Bell } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Link } from "react-router";
 import { Badge } from "../components/ui/Badge";
 
 export function DoctorDashboard() {
-  const stats = getDashboardStats();
+  const { patients } = usePatients();
 
   const riskDistribution = [
-    { name: "Low", value: stats.lowCount, color: "#4CAF50" },
-    { name: "Medium", value: stats.mediumCount, color: "#FFA726" },
-    { name: "High", value: stats.highCount, color: "#FF7043" },
-    { name: "Critical", value: stats.criticalCount, color: "#E53935" },
+    { name: "Low", value: patients.filter(p => p.riskLevel === 'low').length, color: "#4CAF50" },
+    { name: "Medium", value: patients.filter(p => p.riskLevel === 'medium').length, color: "#FFA726" },
+    { name: "High", value: patients.filter(p => p.riskLevel === 'high').length, color: "#FF7043" },
+    { name: "Critical", value: patients.filter(p => p.riskLevel === 'critical').length, color: "#E53935" },
   ];
 
   const weeklyTrend = [
@@ -26,7 +27,7 @@ export function DoctorDashboard() {
   ];
 
   const recentAlerts = mockAlerts.slice(0, 3);
-  const criticalPatients = mockPatients
+  const criticalPatients = patients
     .filter(p => p.riskLevel === "critical" || p.riskLevel === "high")
     .slice(0, 5);
 
@@ -44,7 +45,7 @@ export function DoctorDashboard() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
               <Users size={24} className="opacity-80" />
-              <span className="text-3xl">{stats.totalPatients}</span>
+              <span className="text-3xl">{patients.length}</span>
             </div>
             <p className="text-sm opacity-90">Total Patients</p>
           </CardContent>

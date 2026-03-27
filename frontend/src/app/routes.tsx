@@ -12,6 +12,7 @@ import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import { NotFound } from "./pages/NotFound";
 import DashboardLayout from "./components/DashboardLayout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -28,20 +29,29 @@ export const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <DashboardLayout />,
+    element: <ProtectedRoute />,
     children: [
-      { index: true, element: <Dashboard /> },
-      { path: "patients", element: <Patients /> },
-      { path: "patients/:id", element: <PatientDetail /> },
-      { path: "alerts", element: <Alerts /> },
-      { path: "schedule", element: <Schedule /> },
-      { path: "calls", element: <CallLogs /> },
-      { path: "settings", element: <Settings /> },
-    ],
+      {
+        path: "",
+        element: <DashboardLayout />,
+        children: [
+          { index: true, element: <Dashboard /> },
+          { path: "patients", element: <Patients /> },
+          { path: "patients/:id", element: <PatientDetail /> },
+          { path: "alerts", element: <Alerts /> },
+          { path: "schedule", element: <Schedule /> },
+          { path: "calls", element: <CallLogs /> },
+          { path: "settings", element: <Settings /> },
+        ],
+      }
+    ]
   },
   {
     path: "/admin",
-    element: <AdminPanel />,
+    element: <ProtectedRoute />,
+    children: [
+      { path: "", element: <AdminPanel /> }
+    ]
   },
   {
     path: "*",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   Stethoscope,
   CheckCircle,
@@ -11,8 +11,12 @@ import {
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { supabase } from "../../lib/supabase";
 
 export default function SignUp() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     hospitalName: "",
     adminName: "",
@@ -21,10 +25,34 @@ export default function SignUp() {
     password: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log("Sign up with:", formData);
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            hospitalName: formData.hospitalName,
+            adminName: formData.adminName,
+            phone: formData.phone,
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+      
+      // Optionally redirect to dashboard or verification page
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Failed to sign up.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateFormData = (key: string, value: string) => {
@@ -104,12 +132,17 @@ export default function SignUp() {
                 className="h-11 shadow-sm"
               />
             </div>
+            
+            {error && (
+              <div className="text-sm font-medium text-destructive">{error}</div>
+            )}
 
             <Button
               type="submit"
+              disabled={loading}
               className="w-full h-11 text-base font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] hover:shadow-primary/30 mt-4"
             >
-              Get Started for Free
+              {loading ? "Signing up..." : "Get Started for Free"}
             </Button>
           </form>
 

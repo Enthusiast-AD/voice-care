@@ -1,18 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { Search, Filter, ArrowUpDown } from 'lucide-react';
-import { mockPatients, getRiskBadgeClass, RiskLevel } from '../data/mockData';
+import { Search, Filter, ArrowUpDown, Plus } from 'lucide-react';
+import { getRiskBadgeClass, RiskLevel, Patient } from '../data/mockData';
+import { fetchWithAuth } from '../../lib/api';
+import { AddPatientModal } from '../components/AddPatientModal';
 
 export default function Patients() {
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRisk, setSelectedRisk] = useState<RiskLevel | 'all'>('all');
   const [selectedDiagnosis, setSelectedDiagnosis] = useState('all');
 
+  const loadPatients = async () => {
+    try {
+      setLoading(true);
+      const res = await fetchWithAuth('/patients');
+      // Map backend real data to frontend expected model
+      const realPatients: Patient[] = res.data.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        age: 0, // Not provided by current backend model
+        phone: p.phone_number,
+        language: p.language_preference || 'Hindi',
+        diagnosis: p.primary_diagnosis || 'General',
+        diagnosisCode: p.primary_diagnosis || 'General',
+        dischargeDate: p.created_at,
+        assignedDoctorId: 'N/A',
+        lastCallDate: p.created_at,
+        riskLevel: 'low', // Defaulting as backend doesn't provide it yet
+        riskScore: 0.1,
+      }));
+      setPatients(realPatients);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Failed to load patients");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
   // Get unique diagnoses
-  const diagnoses = Array.from(new Set(mockPatients.map(p => p.diagnosisCode)));
+  const diagnoses = Array.from(new Set(patients.map(p => p.diagnosisCode)));
 
   // Filter patients
-  const filteredPatients = mockPatients
+  const filteredPatients = patients
     .filter(patient => {
       const matchesSearch = patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            patient.phone.includes(searchQuery);
@@ -29,9 +68,18 @@ export default function Patients() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl mb-2 text-primary">Patients</h1>
-        <p className="text-muted-foreground">Manage and monitor all discharged patients</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl mb-2 text-primary">Patients</h1>
+          <p className="text-muted-foreground">Manage and monitor all discharged patients</p>
+        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-sm hover:bg-primary/90 transition"
+        >
+          <Plus className="w-5 h-5" />
+          Add Patient
+        </button>
       </div>
 
       {/* Filters */}
@@ -159,10 +207,16 @@ export default function Patients() {
         )}
       </div>
 
-      {/* Results Count */}
+        {/* Results Count */}
       <div className="mt-4 text-sm text-muted-foreground text-center">
-        Showing {filteredPatients.length} of {mockPatients.length} patients
+        Showing {filteredPatients.length} of {patients.length} patients
       </div>
+
+      <AddPatientModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={loadPatients}
+      />
     </div>
   );
 }

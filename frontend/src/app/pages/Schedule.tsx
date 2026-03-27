@@ -1,5 +1,4 @@
 import { Calendar, Clock, Phone, CheckCircle, XCircle } from 'lucide-react';
-import { mockPatients } from '../data/mockData';
 
 export default function Schedule() {
   // Mock schedule data

@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Users, UserPlus, Settings, Phone, BarChart3, LogOut } from 'lucide-react';
-import { mockPatients, mockDoctors } from '../data/mockData';
+import { mockDoctors } from '../data/mockData';
+import { usePatients } from '../data/usePatients';
+import { AddPatientModal } from '../components/AddPatientModal';
 
 type AdminView = 'patients' | 'doctors' | 'stats';
 
 export default function AdminPanel() {
+  const { patients: mockPatients, refetch: refetchPatients } = usePatients();
   const [activeView, setActiveView] = useState<AdminView>('patients');
   const [showAddPatientModal, setShowAddPatientModal] = useState(false);
 
@@ -98,96 +101,12 @@ export default function AdminPanel() {
               </button>
             </div>
 
-            {/* Add Patient Form */}
-            {showAddPatientModal && (
-              <div className="bg-card p-6 rounded-xl shadow-md border border-border mb-6">
-                <h2 className="text-xl mb-6 text-primary">Add New Patient</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm mb-2">Patient Name</label>
-                    <input
-                      type="text"
-                      placeholder="Enter full name"
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-2">Age</label>
-                    <input
-                      type="number"
-                      placeholder="Age"
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-2">Phone Number</label>
-                    <input
-                      type="tel"
-                      placeholder="+91 XXXXX XXXXX"
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-2">Language Preference</label>
-                    <select className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
-                      <option>Hindi</option>
-                      <option>English</option>
-                      <option>Tamil</option>
-                      <option>Telugu</option>
-                      <option>Bengali</option>
-                      <option>Gujarati</option>
-                      <option>Kannada</option>
-                      <option>Malayalam</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-2">Diagnosis</label>
-                    <input
-                      type="text"
-                      placeholder="Enter diagnosis"
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-2">Diagnosis Category</label>
-                    <select className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
-                      <option>CARDIAC</option>
-                      <option>DIABETIC</option>
-                      <option>SURGICAL</option>
-                      <option>ORTHOPAEDIC</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-2">Discharge Date</label>
-                    <input
-                      type="date"
-                      className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-2">Assigned Doctor</label>
-                    <select className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
-                      {mockDoctors.map(doctor => (
-                        <option key={doctor.id} value={doctor.id}>
-                          {doctor.name} - {doctor.specialty}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div className="flex gap-3 mt-6">
-                  <button className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-                    Save Patient
-                  </button>
-                  <button 
-                    onClick={() => setShowAddPatientModal(false)}
-                    className="px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Add Patient Modal */}
+            <AddPatientModal 
+              isOpen={showAddPatientModal}
+              onClose={() => setShowAddPatientModal(false)}
+              onSuccess={refetchPatients}
+            />
 
             {/* Patients Table */}
             <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden">

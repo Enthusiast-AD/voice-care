@@ -1,21 +1,64 @@
-import { Users, Activity, Phone, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, Activity, Phone, AlertTriangle, TrendingUp, TrendingDown, PlayCircle, ArrowRight } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { mockPatients, mockAlerts, getRiskBadgeClass } from '../data/mockData';
+import { getRiskBadgeClass, Patient } from '../data/mockData';
+import { fetchWithAuth } from '../../lib/api';
+import { useCalls } from '../data/useCalls';
 import { Link } from 'react-router';
 
 export default function Dashboard() {
-  // Calculate stats
-  const totalPatients = mockPatients.length;
-  const criticalCount = mockPatients.filter(p => p.riskLevel === 'critical').length;
-  const highCount = mockPatients.filter(p => p.riskLevel === 'high').length;
-  const mediumCount = mockPatients.filter(p => p.riskLevel === 'medium').length;
-  const lowCount = mockPatients.filter(p => p.riskLevel === 'low').length;
-  
-  const todaysCalls = 24;
-  const completedCalls = 18;
-  const pendingCalls = 6;
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const { calls } = useCalls();
 
-  const recentAlerts = mockAlerts.slice(0, 3);
+  useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        const res = await fetchWithAuth('/patients');
+        const realPatients: Patient[] = res.data.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          age: 0,
+          phone: p.phone_number,
+          language: p.language_preference || 'Hindi',
+          diagnosis: p.primary_diagnosis || 'General',
+          diagnosisCode: p.primary_diagnosis || 'General',
+          dischargeDate: p.created_at,
+          assignedDoctorId: 'N/A',
+          lastCallDate: p.created_at,
+          riskLevel: 'low', // Defaulting as backend doesn't provide it yet
+          riskScore: 0.1,
+        }));
+        setPatients(realPatients);
+      } catch (err) {
+        console.error("Dashboard failed to load patients:", err);
+      }
+    };
+    loadPatients();
+  }, []);
+
+  // Calculate stats
+  const totalPatients = patients.length;
+  // Calculate critical count based on call risk_classification if available, else fallback
+  const recentAlerts = calls.filter(c => c.risk_classification === 'critical' || c.risk_classification === 'high')
+                            .slice(0, 5)
+                            .map((c, i) => ({
+                              id: `a${i}`,
+                              patientId: c.patient_id,
+                              patientName: c.patient?.name || 'Unknown',
+                              type: 'abnormal_symptoms',
+                              severity: c.risk_classification,
+                              message: 'High risk classified after call',
+                              timestamp: c.created_at
+                            }));
+
+  const criticalCount = calls.filter(c => c.risk_classification === 'critical').length;
+  const highCount = calls.filter(c => c.risk_classification === 'high').length;
+  const mediumCount = calls.filter(c => c.risk_classification === 'medium').length;
+  const lowCount = calls.filter(c => c.risk_classification === 'low').length || totalPatients; // default low
+
+  const todaysCalls = calls.filter(c => new Date(c.created_at).toDateString() === new Date().toDateString()).length;
+  const completedCalls = calls.filter(c => c.status === 'completed' && new Date(c.created_at).toDateString() === new Date().toDateString()).length;
+  const pendingCalls = todaysCalls - completedCalls;
 
   // Risk distribution data
   const riskData = [
@@ -99,7 +142,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="text-3xl text-orange-600 mb-1">
-            {mockAlerts.filter(a => !a.acknowledged).length}
+            {recentAlerts.length}
           </div>
           <p className="text-sm text-muted-foreground">Unacknowledged Alerts</p>
         </div>
@@ -196,7 +239,7 @@ export default function Dashboard() {
               key={alert.id}
               className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-secondary/30 transition-colors"
             >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getRiskBadgeClass(alert.riskLevel)}`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getRiskBadgeClass(alert.severity as any)}`}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">

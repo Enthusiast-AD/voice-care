@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { mockPatients, type RiskLevel } from "../data/mockData";
+import { type RiskLevel } from "../data/mockData";
+import { usePatients } from "../data/usePatients";
 import { Badge } from "../components/ui/Badge";
 import { Card, CardContent } from "../components/ui/Card";
 import { Search, Filter, Phone, Calendar } from "lucide-react";
 
 export function PatientList() {
+  const { patients: mockPatients, loading } = usePatients();
   const [searchTerm, setSearchTerm] = useState("");
   const [riskFilter, setRiskFilter] = useState<RiskLevel | "all">("all");
   const [diagnosisFilter, setDiagnosisFilter] = useState("all");

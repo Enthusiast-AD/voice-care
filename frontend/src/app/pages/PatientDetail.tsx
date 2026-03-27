@@ -1,12 +1,39 @@
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, Phone, Calendar, Languages, AlertCircle, FileText, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { mockPatients, mockCallSessions, getRiskBadgeClass, getRiskColor } from '../data/mockData';
+import { getRiskBadgeClass, getRiskColor } from '../data/mockData';
+import { usePatients } from '../data/usePatients';
+import { useCalls } from '../data/useCalls';
+import { useState } from 'react';
+import { fetchWithAuth } from '../../lib/api';
 
 export default function PatientDetail() {
   const { id } = useParams<{ id: string }>();
-  const patient = mockPatients.find(p => p.id === id);
-  const callHistory = mockCallSessions.filter(c => c.patientId === id);
+  const { patients, loading } = usePatients();
+  const { calls } = useCalls();
+  const [triggering, setTriggering] = useState(false);
+
+  const patient = patients.find(p => p.id === id);
+  const callHistory = calls.filter(c => c.patient_id === id);
+
+  const handleCallNow = async () => {
+    try {
+      setTriggering(true);
+      await fetchWithAuth('/calls/trigger', {
+        method: 'POST',
+        body: JSON.stringify({ patient_id: patient?.id })
+      });
+      alert('Call triggered successfully!');
+    } catch(err: any) {
+      alert(`Failed to trigger call: ${err.message}`);
+    } finally {
+      setTriggering(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center text-muted-foreground">Loading patient...</div>;
+  }
 
   if (!patient) {
     return (
@@ -45,10 +72,10 @@ export default function PatientDetail() {
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-6">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl text-primary">
-              {patient.name.split(' ').map(n => n[0]).join('')}
+              {patient.name ? patient.name.split(' ').map(n => n[0]).join('') : '?'}
             </div>
             <div>
-              <h1 className="text-3xl mb-2 text-primary">{patient.name}</h1>
+              <h1 className="text-3xl mb-2 text-primary">{patient.name || 'Unknown'}</h1>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Phone className="w-4 h-4" />
@@ -69,8 +96,18 @@ export default function PatientDetail() {
               </div>
             </div>
           </div>
-          <div className={`px-4 py-2 rounded-full ${getRiskBadgeClass(patient.riskLevel)} text-lg capitalize`}>
-            {patient.riskLevel} Risk
+          <div className="flex flex-col items-end gap-3">
+            <div className={`px-4 py-2 rounded-full ${getRiskBadgeClass(patient.riskLevel)} text-lg capitalize`}>
+              {patient.riskLevel} Risk
+            </div>
+            <button 
+              onClick={handleCallNow}
+              disabled={triggering}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <Phone className="w-4 h-4" />
+              {triggering ? "Initiating Call..." : "Call Patient Now"}
+            </button>
           </div>
         </div>
       </div>
@@ -134,7 +171,7 @@ export default function PatientDetail() {
           <h2 className="text-xl text-primary">Call History</h2>
         </div>
         <div className="space-y-4">
-          {callHistory.map((call, index) => (
+          {(callHistory || []).map((call: any, index: number) => (
             <div key={call.id} className="border border-border rounded-lg p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -143,25 +180,25 @@ export default function PatientDetail() {
                   </div>
                   <div>
                     <p className="text-primary">
-                      {new Date(call.date).toLocaleDateString('en-IN', { 
+                      {new Date(call.created_at || call.started_at || new Date()).toLocaleDateString('en-IN', { 
                         weekday: 'long', 
                         year: 'numeric', 
                         month: 'long', 
                         day: 'numeric' 
                       })}
                     </p>
-                    <p className="text-sm text-muted-foreground">Duration: {call.duration}</p>
+                    <p className="text-sm text-muted-foreground">Duration: {call.duration || 'N/A'}</p>
                   </div>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-sm capitalize ${getRiskBadgeClass(call.riskLevel)}`}>
-                  {call.riskLevel}
+                <div className={`px-3 py-1 rounded-full text-sm capitalize ${getRiskBadgeClass(call.risk_classification || call.riskLevel || 'low')}`}>
+                  {call.risk_classification || call.riskLevel || 'Low'}
                 </div>
               </div>
               
               <div className="mb-3">
                 <h4 className="text-sm mb-2 text-muted-foreground">Symptoms Reported:</h4>
                 <div className="flex flex-wrap gap-2">
-                  {call.symptoms.map((symptom, idx) => (
+                  {(call.symptoms || []).map((symptom: string, idx: number) => (
                     <span key={idx} className="bg-secondary px-3 py-1 rounded-full text-sm">
                       {symptom}
                     </span>

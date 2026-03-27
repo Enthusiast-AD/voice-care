@@ -13,10 +13,13 @@ import {
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { supabase } from "../../lib/supabase";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleDemoLogin = (role: "doctor" | "admin") => {
@@ -29,12 +32,31 @@ export default function SignIn() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === "admin@hospital.com" && password === "admin123") {
-      navigate("/admin");
-    } else {
-      navigate("/dashboard");
+    setLoading(true);
+    setError(null);
+    try {
+      if (email === "admin@hospital.com" && password === "admin123") {
+        navigate("/admin");
+        return;
+      }
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.session) {
+        navigate("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to sign in.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,12 +138,17 @@ export default function SignIn() {
                 className="h-11 shadow-sm"
               />
             </div>
+            
+            {error && (
+              <div className="text-sm font-medium text-destructive">{error}</div>
+            )}
 
             <Button
               type="submit"
+              disabled={loading}
               className="w-full h-11 text-base font-medium shadow-md hover:scale-[1.01] transition-all"
             >
-              Sign in
+              {loading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
 
