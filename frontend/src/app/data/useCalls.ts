@@ -7,6 +7,7 @@ export interface CallLog {
   patient_id: string;
   status: string;
   transcript?: string;
+  structured_transcript?: any;
   symptoms?: any;
   risk_classification?: string;
   started_at: string;

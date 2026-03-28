@@ -198,22 +198,49 @@ export default function PatientDetail() {
               <div className="mb-3">
                 <h4 className="text-sm mb-2 text-muted-foreground">Symptoms Reported:</h4>
                 <div className="flex flex-wrap gap-2">
-                  {(call.symptoms || []).map((symptom: string, idx: number) => (
-                    <span key={idx} className="bg-secondary px-3 py-1 rounded-full text-sm">
-                      {symptom}
-                    </span>
-                  ))}
+                  {Array.isArray(call.symptoms) 
+                    ? call.symptoms.map((symptom: string, idx: number) => (
+                        <span key={idx} className="bg-secondary px-3 py-1 rounded-full text-sm">
+                          {symptom}
+                        </span>
+                      ))
+                    : typeof call.symptoms === 'string'
+                      ? <span className="bg-secondary px-3 py-1 rounded-full text-sm">{call.symptoms}</span>
+                      : typeof call.symptoms === 'object' && call.symptoms !== null
+                        ? Object.values(call.symptoms).map((symptom: any, idx: number) => (
+                            <span key={idx} className="bg-secondary px-3 py-1 rounded-full text-sm">
+                              {String(symptom)}
+                            </span>
+                          ))
+                        : <span className="text-sm text-muted-foreground italic">No symptoms reported</span>
+                  }
                 </div>
               </div>
+
+              {call.structured_transcript && typeof call.structured_transcript === 'object' && call.structured_transcript !== null && !Array.isArray(call.structured_transcript) && (
+                <div className="mb-4 bg-muted/30 p-3 rounded-lg border border-border">
+                  <h4 className="text-sm font-semibold mb-2 text-primary">Structured AI Extraction</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {Object.entries(call.structured_transcript).map(([key, value]) => (
+                      <div key={key} className="flex flex-col mb-1">
+                        <span className="text-muted-foreground text-xs uppercase tracking-wider">{key.replace(/_/g, ' ')}</span>
+                        <span className="font-medium text-foreground">
+                          {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {call.transcript && (
                 <details className="mt-3">
                   <summary className="cursor-pointer text-sm text-primary hover:underline flex items-center gap-2">
                     <FileText className="w-4 h-4" />
-                    View Transcript
+                    View Full Transcript
                   </summary>
-                  <div className="mt-3 p-4 bg-secondary/30 rounded-lg text-sm text-muted-foreground">
-                    {call.transcript}
+                  <div className="mt-3 p-4 bg-secondary/30 rounded-lg text-sm text-muted-foreground whitespace-pre-wrap">
+                    {typeof call.transcript === 'string' ? call.transcript : JSON.stringify(call.transcript)}
                   </div>
                 </details>
               )}

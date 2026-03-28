@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { PrismaClient } from "@prisma/client";
 import twilio from "twilio";
 import { createUltravoxCall } from "../services/ultravox.service.js";
+import { extractStructuredTranscript } from "../services/ai.service.js";
 import redis from "../config/redis.js";
 
 const prisma = new PrismaClient();
@@ -16,10 +17,14 @@ const VoiceResponse = twilio.twiml.VoiceResponse;
  */
 export const handleUltravoxWebhook = asyncHandler(async (req, res) => {
   // 1. Extract call details from Ultravox payload
-  // Note: The specific payload shape will depend on how you configure Ultravox.
-  // For now, tracking to PRD structure: transcript, symptoms, risk score.
-  const { call_id, patient_id, transcript, extracted_symptoms, risk_score } =
-    req.body;
+  const { 
+    call_id, 
+    patient_id, 
+    transcript, 
+    extracted_symptoms, 
+    risk_score, 
+    requested_appointment_time 
+  } = req.body;
 
   if (!call_id || !patient_id) {
     throw new ApiError(
@@ -33,8 +38,35 @@ export const handleUltravoxWebhook = asyncHandler(async (req, res) => {
   );
 
   // 2. Map risk score to enum/string
-  // Usually Low/Medium/High/Critical as per PRD
   const finalRiskScore = risk_score || "Low";
+
+  // Generate structured transcript directly using AI LLM Extractors
+  const structuredTranscript = await extractStructuredTranscript(transcript || "");
+
+  // Let's create an appointment block if there's a proposed date/time
+  // Ensure we negotiate a pending booking rather than guaranteed.
+  let proposedAppointmentData = null;
+  if (requested_appointment_time || structuredTranscript.Requested_Time) {
+    const timeMatch = requested_appointment_time || structuredTranscript.Requested_Time;
+    
+    // We create a dummy proposed_time or let the frontend parse it. 
+    // Usually you'd use a datetime parser here, but for now we set it 24h away as mock.
+    const dateObj = new Date();
+    dateObj.setHours(dateObj.getHours() + 24);
+    
+    try {
+      proposedAppointmentData = await prisma.appointment.create({
+        data: {
+          patient_id,
+          proposed_time: dateObj,
+          status: "PENDING"
+        }
+      });
+      console.log(`[Webhook] Created PENDING appointment for ${patient_id}`);
+    } catch (e) {
+      console.error("[Webhook] Errored creating appointment", e.message);
+    }
+  }
 
   // 3. Save to Database (Call Logs table)
   let callLog;
@@ -43,6 +75,7 @@ export const handleUltravoxWebhook = asyncHandler(async (req, res) => {
       where: { call_id },
       update: {
         transcript: transcript || "",
+        structured_transcript: structuredTranscript,
         symptoms: extracted_symptoms || [],
         risk_classification: finalRiskScore,
         completed_at: new Date(),
@@ -53,6 +86,7 @@ export const handleUltravoxWebhook = asyncHandler(async (req, res) => {
         patient_id,
         status: "completed",
         transcript: transcript || "",
+        structured_transcript: structuredTranscript,
         symptoms: extracted_symptoms || [],
         risk_classification: finalRiskScore,
         completed_at: new Date(),
@@ -69,23 +103,21 @@ export const handleUltravoxWebhook = asyncHandler(async (req, res) => {
   }
 
   // 4. Trigger Realtime Alerts (if High or Critical)
-  // If the risk is High/Critical, in the future this will trigger Socket.io
-  // AND a Twilio SMS to the doctor.
   if (finalRiskScore === "High" || finalRiskScore === "Critical") {
     console.log(
       `🚨 ALERT! Patient ${patient_id} has a ${finalRiskScore} risk level. Dispatching SMS to Doctor.`,
     );
-    // Placeholder for Twilio SMS Integration
-    // await triggerDoctorSMSAlert(patient_id, finalRiskScore, extracted_symptoms);
   }
 
-  // 5. Respond to Ultravox ensuring receipt
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        callLog,
+        {
+          callLog,
+          appointment: proposedAppointmentData
+        },
         "Webhook processed and logged successfully",
       ),
     );
@@ -124,7 +156,8 @@ export const handleTwilioTwiML = asyncHandler(async (req, res) => {
       patient.name,
       patient.primary_diagnosis,
       patient_id,
-      CallSid
+      CallSid,
+      patient.flow_type || "Screening"
     );
 
     // Output connection Stream to Twilio format

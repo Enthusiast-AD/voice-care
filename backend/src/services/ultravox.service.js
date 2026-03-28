@@ -1,30 +1,64 @@
 import axios from "axios";
 import "dotenv/config";
 
+const getDynamicPrompt = (patientName, primaryDiagnosis, flowType) => {
+  const basePrompt = `You are a medical AI assistant for VoiceCare. 
+You are speaking to ${patientName}. The primary diagnosis or problem is: ${primaryDiagnosis}.
+CRITICAL BEHAVIOR RULES:
+- KEEP YOUR RESPONSES EXTREMELY SHORT, MAXIMUM 1 OR 2 SENTENCES.
+- DO NOT RAMBLE. DO NOT OFFER MEDICAL EXPLANATIONS.
+- ASK ONLY ONE QUESTION AT A TIME.
+- FOCUS DIRECTLY ON ${primaryDiagnosis} AND NOTHING ELSE.`;
+
+  if (flowType === "Screening") {
+    return `${basePrompt}
+Your role is triage. Briefly ask about current symptoms related to ${primaryDiagnosis}. 
+Evaluate the severity and suggest OPD visit if needed. Be incredibly concise.`;
+  }
+  
+  if (flowType === "OPD to IPD") {
+    return `${basePrompt}
+Explain admission details very briefly. Remind about insurance and fasting for ${primaryDiagnosis}. Ask if they understood.`;
+  }
+  
+  if (flowType === "Follow-up") {
+    return `${basePrompt}
+Track post-discharge recovery for ${primaryDiagnosis}. 
+Ask ONE short question about swelling or pain. Then ask if they took medications.`;
+  }
+
+  if (flowType === "Vaccination") {
+    return `${basePrompt}
+Remind about the newborn vaccination (${primaryDiagnosis}). Ask a single short question if they are coming to the clinic.`;
+  }
+
+  // Backup generic prompt
+  return `${basePrompt}
+Ask 2-3 simple questions (one by one) to check their current symptoms, wait for their answer, and then politely end the call.`;
+};
+
 export const createUltravoxCall = async (
   patientName,
   primaryDiagnosis,
   patientId,
-  callId
+  callId,
+  flowType = "Screening"
 ) => {
   try {
     const backendUrl = process.env.BACKEND_URL || "https://your-domain.ngrok-free.app";
 
+    const systemPromptGenerated = getDynamicPrompt(patientName, primaryDiagnosis, flowType) + `
+    
+Tell them if they have any severe symptoms like chest pain or difficulty breathing, they should hang up and call an ambulance immediately.
+
+CRITICAL INSTRUCTION: When the conversation is over, or if you need to end the call, you MUST do these TWO actions in order:
+1) FIRST, call the "saveCallData" tool to save the transcript, the symptoms the patient mentioned, and a risk score (Low, Medium, High, or Critical). The call_id is "${callId}" and patient_id is "${patientId}".
+2) SECOND, call the "hangUp" tool to disconnect the call. Do not forget to call "hangUp".`;
+
     const response = await axios.post(
       "https://api.ultravox.ai/api/calls",
       {
-        systemPrompt: `You are a medical AI assistant for VoiceCare.
-            You are calling a patient named ${patientName}.
-            Their primary diagnosis or concern is: ${primaryDiagnosis}.
-
-            Your job is to politely ask them specific questions related ONLY to ${primaryDiagnosis}.
-            Do NOT answer irrelevant questions. Do NOT hallucinate medical advice. Ask 3-4 simple questions to check their current symptoms, wait for their answer, and then politely end the call.
-
-            Tell them if they have any severe symptoms like chest pain or difficulty breathing, they should hang up and call an ambulance immediately.
-
-            CRITICAL INSTRUCTION: When the conversation is over, or if you need to end the call, you MUST do these TWO actions in order:
-            1) FIRST, call the "saveCallData" tool to save the transcript, the symptoms the patient mentioned, and a risk score (Low, Medium, High, or Critical). The call_id is "${callId}" and patient_id is "${patientId}".
-            2) SECOND, call the "hangUp" tool to disconnect the call. Do not forget to call "hangUp".`,
+        systemPrompt: systemPromptGenerated,
         temperature: 0.3,
         model: "ultravox-v0.7",
         medium: { twilio: {} },
@@ -64,6 +98,12 @@ export const createUltravoxCall = async (
                   location: "PARAMETER_LOCATION_BODY",
                   schema: { type: "string", enum: ["Low", "Medium", "High", "Critical"] },
                   required: true
+                },
+                {
+                  name: "requested_appointment_time",
+                  location: "PARAMETER_LOCATION_BODY",
+                  schema: { type: "string" },
+                  required: false
                 }
               ],
               http: {

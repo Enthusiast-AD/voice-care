@@ -20,6 +20,7 @@ export const usePatients = () => {
         language: p.language_preference || 'Hindi',
         diagnosis: p.primary_diagnosis || 'General',
         diagnosisCode: p.primary_diagnosis || 'General',
+        flow_type: p.flow_type || 'Screening',
         dischargeDate: p.created_at,
         assignedDoctorId: 'N/A',
         lastCallDate: p.created_at,

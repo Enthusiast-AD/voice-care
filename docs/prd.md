@@ -199,3 +199,25 @@ The AI conversation follows a structured state machine ensuring clinical complet
 | **Voice AI Engine** | **Ultravox** | End-to-end voice conversation platform — handles speech recognition, LLM processing, and speech synthesis in a single integrated system |
 | **STT (Speech-to-Text)** | Ultravox (built-in) | Real-time transcription of patient speech in Hindi and 10+ Indian languages |
 | **TTS (Text-to-Speech)** | Ultravox (built-in) | Natural-sounding voice responses in patient's language — no separate TTS required |
+
+---
+
+## 7. Key Differentiators / Hackathon Highlights
+
+### 7.1 Structured Transcripts in the Doctor's Dashboard
+Voice conversations are messy. Post-call, the raw text transcript is passed through an LLM (like GPT/Claude) with a strict prompt to output **Structured JSON**. Specific fields like `Chief_Complaint`, `Symptom_Duration`, `Pain_Scale_1_to_10`, and `Requested_Time` are extracted. The doctor's dashboard simply reads this JSON and displays it as clean badges and bullet points, keeping the raw text hidden under a 'View Full Transcript' dropdown.
+
+### 7.2 Admin Inputs & Dynamic Prompts (Name, Phone, Problem, Flow)
+We use **Dynamic Prompt Engineering** on our Node.js backend. When the twilio webhook triggers, our system fetches the patient's data (Name, Phone, Problem, Flow) from the PostgreSQL database (Supabase). We dynamically inject these variables into the System Prompt before passing it to the AI. Example: *"You are calling [Patient Name] who recently had [Knee Surgery]."* This makes the AI highly personalized without writing new code for every patient.
+
+### 7.3 Handling Different Workflows (Screening, OPD->IPD, Follow-ups, Vaccination)
+Instead of one massive, confused AI bot, we designed **Specialized Agent Prompts** based on the patient's journey stage.
+1. **Screening to OPD:** The AI acts as a triage nurse (Symptom collection -> Suggests OPD visit).
+2. **OPD to IPD:** Explains admission details, insurance paperwork reminders, and fasting rules before surgery.
+3. **Post-Discharge:** Tracks recovery and checks if the patient is taking meds on time.
+4. **Newborn Vaccination:** A scheduled chronological agent that automatically calls parents at 6 weeks, 10 weeks, and 14 weeks for missed vaccines. 
+The database strictly assigns the `flow_type` to the patient row, and the backend routes the call logic accordingly.
+
+### 7.4 Appointment Scheduling with Human-in-the-Loop (Doctor Confirmation)
+To ensure 100% safety, we implemented a **Human-in-the-Loop (HITL)** system. The Voice Agent is never allowed to say *"Your appointment is 100% confirmed."* Instead, the AI negotiates a preferred time slot with the patient and says, *"I have requested a slot for Tuesday at 4 PM. You will get a final confirmation shortly."*
+In our Supabase database, this appointment is saved with the status `PENDING`. It shows up on the Doctor's (or Receptionist's) dashboard. Once the doctor checks their schedule and clicks **'Approve'**, the database status changes to `CONFIRMED`, and our system can automatically trigger a Twilio SMS notifying the patient. This completely eliminates double-booking issues.

@@ -1,6 +1,8 @@
 import { Calendar, Clock, Phone, CheckCircle, XCircle } from 'lucide-react';
+import { useAppointments } from '../data/useAppointments';
 
 export default function Schedule() {
+  const { appointments, approveAppointment } = useAppointments();
   // Mock schedule data
   const schedules = [
     { 
@@ -53,8 +55,44 @@ export default function Schedule() {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl mb-2 text-primary">Call Schedule</h1>
-        <p className="text-muted-foreground">Automated follow-up call timeline</p>
+        <h1 className="text-3xl mb-2 text-primary">Call Schedule & Appointments</h1>
+        <p className="text-muted-foreground">Automated follow-up call timeline & pending appointments</p>
+      </div>
+
+      {/* AI Requested Appointments */}
+      <div className="bg-card p-6 rounded-xl shadow-md border border-border mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Calendar className="w-5 h-5 text-accent-foreground" />
+          <h2 className="text-xl text-primary">Pending AI Appointments (HITL)</h2>
+        </div>
+        {appointments.filter((a) => a.status === 'PENDING').length === 0 ? (
+          <p className="text-muted-foreground">No pending appointments requested by AI.</p>
+        ) : (
+          <div className="space-y-4">
+            {appointments.filter((a) => a.status === 'PENDING').map((appt) => (
+              <div key={appt.id} className="flex items-center justify-between p-4 rounded-lg border border-accent/30 bg-accent/5">
+                <div>
+                  <p className="font-semibold text-primary">{appt.patient?.name}</p>
+                  <p className="text-sm text-muted-foreground">Diagnosis: {appt.patient?.primary_diagnosis}</p>
+                  <p className="text-sm text-primary mt-1">Requested Time: {new Date(appt.proposed_time).toLocaleString()}</p>
+                </div>
+                <button
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                  onClick={async () => {
+                    try {
+                      await approveAppointment(appt.id);
+                      alert('Appointment Approved & SMS sent to patient!');
+                    } catch (e) {
+                      alert('Failed to approve appointment');
+                    }
+                  }}
+                >
+                  Approve (Send SMS)
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Stats */}

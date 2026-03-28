@@ -1,10 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "library"
 }
 
@@ -14,31 +9,46 @@ datasource db {
 }
 
 model Patient {
-  id                  String     @id @default(uuid())
+  id                  String        @id @default(uuid())
   name                String
   phone_number        String
-  language_preference String     @default("Hindi")
-  primary_diagnosis   String     @default("General")
-  created_at          DateTime   @default(now())
-  updated_at          DateTime   @updatedAt
+  language_preference String        @default("Hindi")
+  primary_diagnosis   String        @default("General")
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @updatedAt
+  flow_type           String        @default("Screening")
+  appointments        Appointment[]
   call_logs           CallLog[]
 
   @@map("patients")
 }
 
 model CallLog {
-  id                  String    @id @default(uuid())
-  call_id             String    @unique
-  patient             Patient   @relation(fields: [patient_id], references: [id])
-  patient_id          String
-  status              String
-  transcript          String?
-  symptoms            Json?
-  risk_classification String?
-  started_at          DateTime?
-  completed_at        DateTime?
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
+  id                    String    @id @default(uuid())
+  call_id               String    @unique
+  patient_id            String
+  status                String
+  transcript            String?
+  symptoms              Json?
+  risk_classification   String?
+  started_at            DateTime?
+  completed_at          DateTime?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  structured_transcript Json?
+  patient               Patient   @relation(fields: [patient_id], references: [id])
 
   @@map("call_logs")
+}
+
+model Appointment {
+  id            String   @id @default(uuid())
+  patient_id    String
+  status        String   @default("PENDING")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  proposed_time DateTime
+  patient       Patient  @relation(fields: [patient_id], references: [id])
+
+  @@map("appointments")
 }

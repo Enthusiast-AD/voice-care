@@ -13,7 +13,8 @@ export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalP
     name: '',
     phone_number: '',
     language_preference: 'English',
-    primary_diagnosis: ''
+    primary_diagnosis: '',
+    flow_type: 'Screening'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +37,8 @@ export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalP
         name: '',
         phone_number: '',
         language_preference: 'English',
-        primary_diagnosis: ''
+        primary_diagnosis: '',
+        flow_type: 'Screening'
       });
     } catch (err: any) {
       setError(err.message || 'Failed to add patient');
@@ -105,6 +107,20 @@ export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalP
               className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="e.g. Hypertension"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">Journey Flow</label>
+            <select
+              value={formData.flow_type}
+              onChange={e => setFormData({...formData, flow_type: e.target.value})}
+              className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="Screening">Screening & Triage</option>
+              <option value="OPD to IPD">OPD to IPD Admission</option>
+              <option value="Follow-up">Post-Discharge Follow-up</option>
+              <option value="Vaccination">Newborn Vaccination</option>
+            </select>
           </div>
 
           {error && <div className="text-red-500 text-sm">{error}</div>}

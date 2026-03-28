@@ -10,6 +10,7 @@ export interface Patient {
   language: string;
   diagnosis: string;
   diagnosisCode: string;
+  flow_type?: string;
   dischargeDate: string;
   assignedDoctorId: string;
   lastCallDate: string;

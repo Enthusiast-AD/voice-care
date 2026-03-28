@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { PrismaClient } from "@prisma/client";
 import redis from "../config/redis.js";
+import twilio from "twilio";
 
 const prisma = new PrismaClient({});
 
@@ -44,7 +45,7 @@ export const getAllPatients = asyncHandler(async (req, res) => {
  * @access  Private
  */
 export const addPatient = asyncHandler(async (req, res) => {
-  const { name, phone_number, language_preference, primary_diagnosis } =
+  const { name, phone_number, language_preference, primary_diagnosis, flow_type } =
     req.body;
 
   if (!name || !phone_number) {
@@ -58,6 +59,7 @@ export const addPatient = asyncHandler(async (req, res) => {
         phone_number,
         language_preference: language_preference || "Hindi",
         primary_diagnosis: primary_diagnosis || "General",
+        flow_type: flow_type || "Screening"
       },
     });
 
@@ -71,5 +73,84 @@ export const addPatient = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error inserting patient into database", [
       error.message,
     ]);
+  }
+});
+
+/**
+ * @desc    Get all appointments
+ * @route   GET /api/patients/appointments
+ * @access  Private
+ */
+export const getAppointments = asyncHandler(async (req, res) => {
+  try {
+    const appointments = await prisma.appointment.findMany({
+      include: {
+        patient: true
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, appointments, "Appointments retrieved successfully"));
+  } catch (error) {
+    throw new ApiError(500, "Error fetching appointments from Database", [
+      error.message,
+    ]);
+  }
+});
+
+/**
+ * @desc    Approve a pending appointment and send SMS
+ * @route   POST /api/patients/appointments/:appointmentId/approve
+ * @access  Private
+ */
+export const approveAppointment = asyncHandler(async (req, res) => {
+  const { appointmentId } = req.params;
+
+  try {
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: { patient: true }
+    });
+
+    if (!appointment) {
+      throw new ApiError(404, "Appointment not found");
+    }
+
+    if (appointment.status === "CONFIRMED") {
+      return res.status(400).json(new ApiResponse(400, appointment, "Appointment is already confirmed."));
+    }
+
+    const updatedAppointment = await prisma.appointment.update({
+      where: { id: appointmentId },
+      data: { status: "CONFIRMED" }
+    });
+
+    // Send SMS via Twilio using Human-in-the-Loop concept
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+      const msg = `Hello ${appointment.patient.name}, your appointment for ${appointment.patient.primary_diagnosis} has been confirmed for ${new Date(updatedAppointment.proposed_time).toLocaleString()}.`;
+      
+      try {
+        await client.messages.create({
+          body: msg,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: appointment.patient.phone_number
+        });
+        console.log(`[SMS] Confirmation sent to ${appointment.patient.phone_number}`);
+      } catch (err) {
+        console.error("[SMS] Failed to send SMS:", err.message);
+      }
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedAppointment, "Appointment confirmed successfully"));
+
+  } catch (error) {
+    throw new ApiError(500, "Error updating appointment", [error.message]);
   }
 });
