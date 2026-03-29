@@ -1,10 +1,13 @@
 import express from 'express';
-import { getAllPatients, addPatient, approveAppointment, getAppointments } from '../controllers/patient.controller.js';
+import { getAllPatients, addPatient, approveAppointment, getAppointments, bookAppointment } from '../controllers/patient.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// Apply auth middleware to all patient routes
+// Public route for booking appointments outside dashboard
+router.post('/public/appointments', bookAppointment);
+
+// Apply auth middleware to all OTHER patient routes
 router.use(authMiddleware);
 
 router.route('/')
@@ -12,7 +15,8 @@ router.route('/')
     .post(addPatient);
 
 router.route('/appointments')
-    .get(getAppointments);
+    .get(getAppointments)
+    .post(bookAppointment);
 
 router.route('/appointments/:appointmentId/approve')
     .post(approveAppointment);

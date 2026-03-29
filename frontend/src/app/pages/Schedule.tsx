@@ -107,9 +107,9 @@ export default function Schedule() {
                     onClick={async () => {
                       try {
                         await approveAppointment(appt.id);
-                        alert("Appointment Approved & SMS sent to patient!");
+                        toast.success("Appointment Approved & SMS sent to patient!");
                       } catch (e) {
-                        alert("Failed to approve appointment");
+                        toast.error("Failed to approve appointment");
                       }
                     }}
                   >

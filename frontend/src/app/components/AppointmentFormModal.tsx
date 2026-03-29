@@ -1,4 +1,6 @@
 import React from "react";
+import { toast } from "sonner";
+import { fetchWithAuth } from "../../lib/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -62,14 +64,35 @@ export function AppointmentFormModal({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // For now, just logging and showing success since it's frontend only
-    console.log("Form submitted:", values);
-    alert(
-      "Appointment query submitted successfully! Our admin will contact you soon.",
-    );
-    if (onOpenChange) onOpenChange(false);
-    form.reset();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      // Map preferredSession to a specific time component for demo purposes
+      let timeString = "09:00:00";
+      if (values.preferredSession === "Afternoon") timeString = "14:00:00";
+      if (values.preferredSession === "Evening") timeString = "18:00:00";
+      
+      const proposedTime = new Date(`${values.preferredDate}T${timeString}`);
+
+      console.log("Booking appointment:", values);
+      
+      await fetchWithAuth('/patients/public/appointments', {
+        method: "POST",
+        body: JSON.stringify({
+          name: values.name,
+          phone: values.phone,
+          email: values.email,
+          type: values.type,
+          proposed_time: proposedTime.toISOString()
+        })
+      });
+
+      toast.success("Appointment booked successfully! Our admin will contact you soon.");
+      if (onOpenChange) onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.error("Failed to book appointment:", error);
+      toast.error("Failed to book appointment. Please try again.");
+    }
   }
 
   return (

@@ -95,6 +95,7 @@ export const handleUltravoxWebhook = asyncHandler(async (req, res) => {
     
     // Invalidate the calls cache
     await redis.del("calls:all");
+    await redis.del("patients:all");
   } catch (dbError) {
     console.error("Prisma DB Error:", dbError);
     throw new ApiError(500, "Failed to log call data into Database", [
@@ -193,6 +194,7 @@ export const handleTwilioStatus = asyncHandler(async (req, res) => {
     
     // Invalidate the calls cache
     await redis.del("calls:all");
+    await redis.del("patients:all");
   } catch (error) {
     console.error("Failed to update call status:", error.message);
   }

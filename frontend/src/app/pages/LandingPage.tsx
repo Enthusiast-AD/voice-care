@@ -57,12 +57,6 @@ export default function LandingPage() {
               >
                 Benefits
               </a>
-              <a
-                href="#impact"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                Impact
-              </a>
               <button
                 onClick={() => setAppointmentModalOpen(true)}
                 className="text-muted-foreground hover:text-primary transition-colors font-medium"
@@ -119,12 +113,6 @@ export default function LandingPage() {
                   className="text-muted-foreground hover:text-primary transition-colors py-2"
                 >
                   Benefits
-                </a>
-                <a
-                  href="#impact"
-                  className="text-muted-foreground hover:text-primary transition-colors py-2"
-                >
-                  Impact
                 </a>
                 <button
                   onClick={() => {

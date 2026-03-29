@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router';
+import { toast } from 'sonner';
 import { ArrowLeft, Phone, Calendar, Languages, AlertCircle, FileText, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { getRiskBadgeClass, getRiskColor } from '../data/mockData';
@@ -23,9 +24,9 @@ export default function PatientDetail() {
         method: 'POST',
         body: JSON.stringify({ patient_id: patient?.id })
       });
-      alert('Call triggered successfully!');
+      toast.success('Call triggered successfully!');
     } catch(err: any) {
-      alert(`Failed to trigger call: ${err.message}`);
+      toast.error(`Failed to trigger call: ${err.message}`);
     } finally {
       setTriggering(false);
     }
@@ -83,7 +84,6 @@ export default function PatientDetail() {
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  Age: {patient.age}
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Languages className="w-4 h-4" />

@@ -33,7 +33,7 @@ export default function Patients() {
         dischargeDate: p.created_at,
         assignedDoctorId: "N/A",
         lastCallDate: p.created_at,
-        riskLevel: "low", // Defaulting as backend doesn't provide it yet
+        riskLevel: (p.call_logs && p.call_logs.length > 0 && p.call_logs[0].risk_classification) ? p.call_logs[0].risk_classification.toLowerCase() : 'low',
         riskScore: 0.1,
       }));
       setPatients(realPatients);
@@ -191,9 +191,6 @@ export default function Patients() {
                   <td className="px-6 py-4">
                     <div>
                       <div className="text-primary">{patient.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Age: {patient.age}
-                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">

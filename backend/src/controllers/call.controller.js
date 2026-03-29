@@ -53,6 +53,7 @@ export const triggerPatientCall = asyncHandler(async (req, res) => {
     
     // Invalidate the calls cache
     await redis.del("calls:all");
+    await redis.del("patients:all");
   } catch (dbError) {
     console.error("Failed to insert call log natively", dbError);
   }

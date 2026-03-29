@@ -25,7 +25,7 @@ export default function Dashboard() {
           dischargeDate: p.created_at,
           assignedDoctorId: 'N/A',
           lastCallDate: p.created_at,
-          riskLevel: 'low', // Defaulting as backend doesn't provide it yet
+          riskLevel: (p.call_logs && p.call_logs.length > 0 && p.call_logs[0].risk_classification) ? p.call_logs[0].risk_classification.toLowerCase() : 'low',
           riskScore: 0.1,
         }));
         setPatients(realPatients);
@@ -39,7 +39,7 @@ export default function Dashboard() {
   // Calculate stats
   const totalPatients = patients.length;
   // Calculate critical count based on call risk_classification if available, else fallback
-  const recentAlerts = calls.filter(c => c.risk_classification === 'critical' || c.risk_classification === 'high')
+  const recentAlerts = calls.filter(c => c.risk_classification?.toLowerCase() === 'critical' || c.risk_classification?.toLowerCase() === 'high')
                             .slice(0, 5)
                             .map((c, i) => ({
                               id: `a${i}`,
@@ -51,10 +51,10 @@ export default function Dashboard() {
                               timestamp: c.created_at
                             }));
 
-  const criticalCount = calls.filter(c => c.risk_classification === 'critical').length;
-  const highCount = calls.filter(c => c.risk_classification === 'high').length;
-  const mediumCount = calls.filter(c => c.risk_classification === 'medium').length;
-  const lowCount = calls.filter(c => c.risk_classification === 'low').length || totalPatients; // default low
+  const criticalCount = patients.filter(p => p.riskLevel === 'critical').length;
+  const highCount = patients.filter(p => p.riskLevel === 'high').length;
+  const mediumCount = patients.filter(p => p.riskLevel === 'medium').length;
+  const lowCount = patients.filter(p => p.riskLevel === 'low').length;
 
   const todaysCalls = calls.filter(c => new Date(c.created_at).toDateString() === new Date().toDateString()).length;
   const completedCalls = calls.filter(c => c.status === 'completed' && new Date(c.created_at).toDateString() === new Date().toDateString()).length;

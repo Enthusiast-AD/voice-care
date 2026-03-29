@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { Users, UserPlus, Settings, Phone, BarChart3, LogOut } from 'lucide-react';
+import { Users, UserPlus, Settings, Phone, BarChart3, LogOut, Calendar, Clock } from 'lucide-react';
+import { useAppointments } from '../data/useAppointments';
+import { toast } from 'sonner';
 import { mockDoctors } from '../data/mockData';
 import { usePatients } from '../data/usePatients';
 import { AddPatientModal } from '../components/AddPatientModal';
 
-type AdminView = 'patients' | 'doctors' | 'stats';
+type AdminView = 'patients' | 'doctors' | 'stats' | 'appointments';
 
 export default function AdminPanel() {
   const { patients: mockPatients, refetch: refetchPatients } = usePatients();
+  const { appointments, approveAppointment } = useAppointments();
+  const pendingAppointments = appointments.filter(a => a.status === 'PENDING' || a.status === 'pending');
   const [activeView, setActiveView] = useState<AdminView>('patients');
   const [showAddPatientModal, setShowAddPatientModal] = useState(false);
 
@@ -27,6 +31,17 @@ export default function AdminPanel() {
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
+          <button
+            onClick={() => setActiveView('appointments')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              activeView === 'appointments'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50'
+            }`}
+          >
+            <Calendar className="w-5 h-5" />
+            <span>Appointments</span>
+          </button>
           <button
             onClick={() => setActiveView('patients')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
@@ -148,6 +163,92 @@ export default function AdminPanel() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        
+        {/* Appointments View */}
+        {activeView === 'appointments' && (
+          <div className="p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl mb-2 text-primary">Appointment Management</h1>
+                <p className="text-muted-foreground">Review and approve patient appointments</p>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-xl shadow-md border border-border p-6 mb-8">
+              <h2 className="text-xl mb-4 text-[#1A3A36] flex items-center gap-2">
+                <Clock className="text-[#2D9A8C]" size={20} />
+                Pending Approvals
+              </h2>
+              {pendingAppointments.length === 0 ? (
+                <p className="text-[#5A7470]">No pending appointments requiring approval.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {pendingAppointments.map((appt) => (
+                     <div key={appt.id} className="p-4 border border-[rgba(45,154,140,0.15)] rounded-lg bg-background flex flex-col justify-between items-start gap-4">
+                      <div>
+                        <p className="font-medium text-[#1A3A36] text-lg">{appt.patient?.name || "Unknown Patient"}</p>
+                        <p className="text-sm text-[#5A7470] mt-1">
+                          Requested Date: {new Date(appt.proposed_date || appt.proposed_time).toLocaleString()}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Reason: {appt.patient?.primary_diagnosis || "Follow-up"}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={async () => {
+                          try {
+                            await approveAppointment(appt.id);
+                            toast.success("Appointment Approved & SMS sent to patient!");
+                          } catch (e) {
+                            toast.error("Failed to approve appointment.");
+                          }
+                        }}
+                        className="px-4 py-2 w-full bg-[#2D9A8C] text-white rounded-lg hover:bg-[#166F63] transition-colors font-medium"
+                      >
+                        Approve Appointment
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="bg-card rounded-xl shadow-md border border-border p-6">
+              <h2 className="text-xl mb-4 text-[#1A3A36]">All Appointments</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left border-b border-border text-muted-foreground">
+                      <th className="pb-3 font-medium px-4">Patient</th>
+                      <th className="pb-3 font-medium px-4">Proposed Time</th>
+                      <th className="pb-3 font-medium px-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {appointments.map((appt) => (
+                      <tr key={appt.id} className="border-b border-border/50 hover:bg-muted/50">
+                        <td className="py-4 px-4 text-primary">{appt.patient?.name || "Unknown"}</td>
+                        <td className="py-4 px-4 text-muted-foreground">
+                          {new Date(appt.proposed_date || appt.proposed_time).toLocaleString()}
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            appt.status.toLowerCase() === 'pending' ? 'bg-[#EDF2F0] text-[#1A7A6E]' :
+                            appt.status.toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {appt.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

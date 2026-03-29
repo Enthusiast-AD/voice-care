@@ -22,6 +22,12 @@ export const getAllPatients = asyncHandler(async (req, res) => {
     }
 
     const patients = await prisma.patient.findMany({
+      include: {
+        call_logs: {
+          orderBy: { created_at: "desc" },
+          take: 1
+        }
+      },
       orderBy: {
         created_at: "desc",
       },
@@ -109,6 +115,7 @@ export const getAppointments = asyncHandler(async (req, res) => {
  */
 export const approveAppointment = asyncHandler(async (req, res) => {
   const { appointmentId } = req.params;
+  const { new_time } = req.body || {};
 
   try {
     const appointment = await prisma.appointment.findUnique({
@@ -126,7 +133,10 @@ export const approveAppointment = asyncHandler(async (req, res) => {
 
     const updatedAppointment = await prisma.appointment.update({
       where: { id: appointmentId },
-      data: { status: "CONFIRMED" }
+      data: { 
+        status: "CONFIRMED",
+        ...(new_time && { proposed_time: new Date(new_time) })
+      }
     });
 
     // Send SMS via Twilio using Human-in-the-Loop concept
@@ -153,4 +163,53 @@ export const approveAppointment = asyncHandler(async (req, res) => {
   } catch (error) {
     throw new ApiError(500, "Error updating appointment", [error.message]);
   }
+});
+
+/**
+ * @desc    Book a new appointment manually
+ * @route   POST /api/patients/appointments
+ * @access  Private
+ */
+export const bookAppointment = asyncHandler(async (req, res) => {
+  const { patient_id, proposed_time, name, phone, type, email } = req.body;
+  
+  if (!proposed_time) {
+    throw new ApiError(400, "proposed_time is required");
+  }
+  
+  let finalPatientId = patient_id;
+
+  // If coming from the public landing page form, we find or create the patient
+  if (!finalPatientId && name && phone) {
+    let patient = await prisma.patient.findFirst({
+      where: { phone_number: phone }
+    });
+    
+    if (!patient) {
+      patient = await prisma.patient.create({
+        data: {
+          name,
+          phone_number: phone,
+          flow_type: type || "OPD",
+          primary_diagnosis: email ? `Email: ${email}` : "General"
+        }
+      });
+    }
+    finalPatientId = patient.id;
+  }
+  
+  if (!finalPatientId) {
+    throw new ApiError(400, "patient_id or (name and phone) is required");
+  }
+
+  const appointment = await prisma.appointment.create({
+    data: {
+      patient_id: finalPatientId,
+      proposed_time: new Date(proposed_time),
+      status: "PENDING"
+    },
+    include: { patient: true }
+  });
+
+  return res.status(201).json(new ApiResponse(201, appointment, "Appointment booked successfully"));
 });

@@ -24,7 +24,7 @@ export const usePatients = () => {
         dischargeDate: p.created_at,
         assignedDoctorId: 'N/A',
         lastCallDate: p.created_at,
-        riskLevel: 'low',
+        riskLevel: (p.call_logs && p.call_logs.length > 0 && p.call_logs[0].risk_classification) ? p.call_logs[0].risk_classification.toLowerCase() : 'low',
         riskScore: 0.1,
       }));
       setPatients(realPatients);

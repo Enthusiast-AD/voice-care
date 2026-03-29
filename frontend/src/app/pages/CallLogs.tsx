@@ -1,70 +1,35 @@
-import { Phone, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Phone, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { Link } from 'react-router';
 import { getRiskBadgeClass } from '../data/mockData';
+import { useCalls } from '../data/useCalls';
+import { useMemo } from 'react';
 
 export default function CallLogs() {
-  const callLogs = [
-    {
-      id: 'CL001',
-      patientId: 'P001',
-      patientName: 'Rajesh Kumar',
-      phone: '+91 98765 43210',
-      startTime: '2026-03-24T10:45:00',
-      endTime: '2026-03-24T10:49:32',
-      duration: '4:32',
-      status: 'completed',
-      riskLevel: 'critical' as const
-    },
-    {
-      id: 'CL002',
-      patientId: 'P002',
-      patientName: 'Priya Sharma',
-      phone: '+91 98765 43211',
-      startTime: '2026-03-24T09:30:00',
-      endTime: '2026-03-24T09:35:12',
-      duration: '5:12',
-      status: 'completed',
-      riskLevel: 'high' as const
-    },
-    {
-      id: 'CL003',
-      patientId: 'P003',
-      patientName: 'Amit Patel',
-      phone: '+91 98765 43212',
-      startTime: '2026-03-24T11:00:00',
-      endTime: null,
-      duration: null,
-      status: 'failed',
-      riskLevel: null
-    },
-    {
-      id: 'CL004',
-      patientId: 'P004',
-      patientName: 'Lakshmi Reddy',
-      phone: '+91 98765 43213',
-      startTime: '2026-03-23T15:20:00',
-      endTime: '2026-03-23T15:23:45',
-      duration: '3:45',
-      status: 'completed',
-      riskLevel: 'low' as const
-    },
-    {
-      id: 'CL005',
-      patientId: 'P005',
-      patientName: 'Mohammed Ali',
-      phone: '+91 98765 43214',
-      startTime: '2026-03-23T14:10:00',
-      endTime: '2026-03-23T14:16:30',
-      duration: '6:30',
-      status: 'completed',
-      riskLevel: 'high' as const
-    },
-  ];
+  const { calls: callLogs, loading, error } = useCalls();
 
   const totalCalls = callLogs.length;
   const completedCalls = callLogs.filter(c => c.status === 'completed').length;
   const failedCalls = callLogs.filter(c => c.status === 'failed').length;
-  const avgDuration = '4:45';
+
+  const avgDuration = useMemo(() => {
+    if (!callLogs.length) return '0:00';
+    let totalSeconds = 0;
+    let completedCount = 0;
+    callLogs.forEach(c => {
+      if (c.status === 'completed' && c.started_at && c.completed_at) {
+        totalSeconds += (new Date(c.completed_at).getTime() - new Date(c.started_at).getTime()) / 1000;
+        completedCount++;
+      }
+    });
+    if (!completedCount) return '0:00';
+    const avgSecs = totalSeconds / completedCount;
+    const mins = Math.floor(avgSecs / 60);
+    const secs = Math.floor(avgSecs % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }, [callLogs]);
+
+  if (loading) return <div className="p-8"><p>Loading calls...</p></div>;
+  if (error) return <div className="p-8"><p className="text-red-500">Error: {error}</p></div>;
 
   return (
     <div className="p-8">
@@ -141,29 +106,32 @@ export default function CallLogs() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {callLogs.map((log) => (
+              {callLogs.map((log: any) => (
                 <tr key={log.id} className="hover:bg-secondary/30 transition-colors">
                   <td className="px-6 py-4">
                     <Link 
-                      to={`/dashboard/patients/${log.patientId}`}
+                      to={`/dashboard/patients/${log.patient_id}`}
                       className="text-primary hover:underline"
                     >
-                      {log.patientName}
+                      {log.patient ? log.patient.name : 'Unknown'}
                     </Link>
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {log.phone}
+                    {log.patient?.phone_number || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {new Date(log.startTime).toLocaleString('en-IN', {
+                    {log.started_at ? new Date(log.started_at).toLocaleString('en-IN', {
                       month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit'
-                    })}
+                    }) : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {log.duration || '-'}
+                    {(log.started_at && log.completed_at) ? (() => {
+                      const sec = Math.floor((new Date(log.completed_at).getTime() - new Date(log.started_at).getTime()) / 1000);
+                      return `${Math.floor(sec / 60)}:${(sec % 60).toString().padStart(2, '0')}`;
+                    })() : '-'}
                   </td>
                   <td className="px-6 py-4">
                     {log.status === 'completed' && (
@@ -178,11 +146,17 @@ export default function CallLogs() {
                         Failed
                       </span>
                     )}
+                    {log.status === 'initiated' && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
+                        <Clock className="w-4 h-4" />
+                        Initiated
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
-                    {log.riskLevel ? (
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm capitalize ${getRiskBadgeClass(log.riskLevel)}`}>
-                        {log.riskLevel}
+                    {log.risk_classification ? (
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm capitalize ${getRiskBadgeClass(log.risk_classification)}`}>
+                        {log.risk_classification}
                       </span>
                     ) : (
                       <span className="text-muted-foreground text-sm">-</span>

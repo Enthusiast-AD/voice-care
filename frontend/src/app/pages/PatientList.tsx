@@ -110,7 +110,6 @@ export function PatientList() {
                       <Phone size={14} />
                       {patient.phone}
                     </div>
-                    <p className="text-xs text-[#5A7470] mt-1">Age: {patient.age}</p>
                   </div>
 
                   {/* Diagnosis */}

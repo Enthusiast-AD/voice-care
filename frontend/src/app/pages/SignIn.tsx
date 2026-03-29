@@ -84,7 +84,7 @@ export default function SignIn() {
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-3 mb-6">
-              <button
+              {/* <button
                 type="button"
                 onClick={() => handleDemoLogin("doctor")}
                 className="flex flex-col items-center justify-center p-3 border border-border rounded-xl hover:bg-primary/5 hover:border-primary transition-all group"
@@ -93,8 +93,8 @@ export default function SignIn() {
                 <span className="text-xs font-medium text-muted-foreground group-hover:text-primary">
                   Demo Doctor
                 </span>
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 type="button"
                 onClick={() => handleDemoLogin("admin")}
                 className="flex flex-col items-center justify-center p-3 border border-border rounded-xl hover:bg-primary/5 hover:border-primary transition-all group"
@@ -103,7 +103,7 @@ export default function SignIn() {
                 <span className="text-xs font-medium text-muted-foreground group-hover:text-primary">
                   Demo Admin
                 </span>
-              </button>
+              </button> */}
             </div>
 
             <div className="space-y-2">

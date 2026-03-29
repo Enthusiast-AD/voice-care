@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card"
 import { getRiskColor } from "../data/mockData";
 import { usePatients } from "../data/usePatients";
 import { useCalls } from "../data/useCalls";
+import { useAppointments } from "../data/useAppointments";
+import { toast } from "sonner";
 import { Users, AlertTriangle, Phone, TrendingUp, Clock, Bell } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Link } from "react-router";
@@ -10,6 +12,9 @@ import { Badge } from "../components/ui/Badge";
 export function DoctorDashboard() {
   const { patients } = usePatients();
   const { calls } = useCalls();
+  const { appointments, approveAppointment } = useAppointments();
+
+  const pendingAppointments = appointments.filter(a => a.status === "PENDING" || a.status === "pending");
 
   const stats = {
     criticalCount: patients.filter(p => p.risk_classification === 'Critical' || p.riskLevel === 'critical').length,
@@ -284,6 +289,59 @@ export function DoctorDashboard() {
                 </Link>
               ))}
             </div>
+          </CardContent>
+        </Card>
+        {/* Pending Appointments */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Clock size={20} className="text-[#2D9A8C]" />
+                Pending Appointments
+              </CardTitle>
+              <Link 
+                to="/dashboard/schedule"
+                className="text-sm text-[#2D9A8C] hover:text-[#166F63]"
+              >
+                View full schedule →
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {pendingAppointments.length === 0 ? (
+              <p className="text-[#5A7470]">No pending appointments right now.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pendingAppointments.map((appt) => (
+                  <div key={appt.id} className="p-4 border rounded-lg bg-white flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-[#1A3A36]">{appt.patient?.name || "Unknown Patient"}</p>
+                      <p className="text-sm text-[#5A7470]">
+                        Requested: {new Date(appt.proposed_date || appt.proposed_time).toLocaleString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Reason: {appt.patient?.primary_diagnosis || "General Follow-up"}
+                      </p>
+                    </div>
+                    <div>
+                      <button 
+                        onClick={async () => {
+                          try {
+                            await approveAppointment(appt.id);
+                            toast.success("Appointment Approved & SMS sent to patient!");
+                          } catch (e) {
+                            toast.error("Failed to approve appointment");
+                          }
+                        }}
+                        className="px-4 py-2 bg-[#2D9A8C] text-white rounded hover:bg-[#166F63] transition-colors text-sm font-medium"
+                      >
+                        Approve Time
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

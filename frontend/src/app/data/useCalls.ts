@@ -25,7 +25,8 @@ export const useCalls = () => {
     try {
       setLoading(true);
       const res = await fetchWithAuth('/calls');
-      setCalls(res.data || []);
+      const formatted = (res.data || []).map((c: any) => ({ ...c, risk_classification: c.risk_classification ? c.risk_classification.toLowerCase() : undefined, }));
+      setCalls(formatted);
     } catch (err: any) {
       console.error("Failed to load calls:", err);
       setError(err.message || 'Failed to load calls');

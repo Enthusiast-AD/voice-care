@@ -34,10 +34,27 @@ export const useAppointments = () => {
     }
   };
 
-  const approveAppointment = async (id: string) => {
+  const bookNewAppointment = async (patientId: string, proposedTime: Date | string) => {
+    try {
+      await fetchWithAuth("/patients/appointments", {
+        method: "POST",
+        body: JSON.stringify({
+          patient_id: patientId,
+          proposed_time: new Date(proposedTime).toISOString()
+        })
+      });
+      await loadAppointments();
+    } catch (err: any) {
+      console.error("Failed to book:", err);
+      throw err;
+    }
+  };
+
+  const approveAppointment = async (id: string, newTime?: Date | string) => {
     try {
       await fetchWithAuth(`/patients/appointments/${id}/approve`, {
         method: "POST",
+        body: newTime ? JSON.stringify({ new_time: new Date(newTime).toISOString() }) : undefined
       });
       await loadAppointments();
     } catch (err: any) {
@@ -56,5 +73,6 @@ export const useAppointments = () => {
     error,
     refetch: loadAppointments,
     approveAppointment,
+    bookNewAppointment,
   };
 };
