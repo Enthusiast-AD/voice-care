@@ -1,35 +1,37 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router';
-import { Search, Filter, ArrowUpDown, Plus } from 'lucide-react';
-import { getRiskBadgeClass, RiskLevel, Patient } from '../data/mockData';
-import { fetchWithAuth } from '../../lib/api';
-import { AddPatientModal } from '../components/AddPatientModal';
+import { useState, useEffect } from "react";
+import { Link } from "react-router";
+import { Search, Filter, ArrowUpDown, Plus } from "lucide-react";
+import { getRiskBadgeClass, RiskLevel, Patient } from "../data/mockData";
+import { fetchWithAuth } from "../../lib/api";
+import { AddPatientModal } from "../components/AddPatientModal";
+import { ImportPatientsModal } from "../components/ImportPatientsModal";
 
 export default function Patients() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRisk, setSelectedRisk] = useState<RiskLevel | 'all'>('all');
-  const [selectedDiagnosis, setSelectedDiagnosis] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRisk, setSelectedRisk] = useState<RiskLevel | "all">("all");
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState("all");
 
   const loadPatients = async () => {
     try {
       setLoading(true);
-      const res = await fetchWithAuth('/patients');
+      const res = await fetchWithAuth("/patients");
       // Map backend real data to frontend expected model
       const realPatients: Patient[] = res.data.map((p: any) => ({
         id: p.id,
         name: p.name,
         age: 0, // Not provided by current backend model
         phone: p.phone_number,
-        language: p.language_preference || 'Hindi',
-        diagnosis: p.primary_diagnosis || 'General',
-        diagnosisCode: p.primary_diagnosis || 'General',
+        language: p.language_preference || "Hindi",
+        diagnosis: p.primary_diagnosis || "General",
+        diagnosisCode: p.primary_diagnosis || "General",
         dischargeDate: p.created_at,
-        assignedDoctorId: 'N/A',
+        assignedDoctorId: "N/A",
         lastCallDate: p.created_at,
         riskLevel: (p.call_logs && p.call_logs.length > 0 && p.call_logs[0].risk_classification) ? p.call_logs[0].risk_classification.toLowerCase() : 'low',
         riskScore: 0.1,
@@ -48,15 +50,19 @@ export default function Patients() {
   }, []);
 
   // Get unique diagnoses
-  const diagnoses = Array.from(new Set(patients.map(p => p.diagnosisCode)));
+  const diagnoses = Array.from(new Set(patients.map((p) => p.diagnosisCode)));
 
   // Filter patients
   const filteredPatients = patients
-    .filter(patient => {
-      const matchesSearch = patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           patient.phone.includes(searchQuery);
-      const matchesRisk = selectedRisk === 'all' || patient.riskLevel === selectedRisk;
-      const matchesDiagnosis = selectedDiagnosis === 'all' || patient.diagnosisCode === selectedDiagnosis;
+    .filter((patient) => {
+      const matchesSearch =
+        patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        patient.phone.includes(searchQuery);
+      const matchesRisk =
+        selectedRisk === "all" || patient.riskLevel === selectedRisk;
+      const matchesDiagnosis =
+        selectedDiagnosis === "all" ||
+        patient.diagnosisCode === selectedDiagnosis;
       return matchesSearch && matchesRisk && matchesDiagnosis;
     })
     .sort((a, b) => {
@@ -71,15 +77,25 @@ export default function Patients() {
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-3xl mb-2 text-primary">Patients</h1>
-          <p className="text-muted-foreground">Manage and monitor all discharged patients</p>
+          <p className="text-muted-foreground">
+            Manage and monitor all discharged patients
+          </p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-sm hover:bg-primary/90 transition"
-        >
-          <Plus className="w-5 h-5" />
-          Add Patient
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow-sm hover:bg-secondary/80 transition border border-border"
+          >
+            Import
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-sm hover:bg-primary/90 transition"
+          >
+            <Plus className="w-5 h-5" />
+            Add Patient
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -102,7 +118,9 @@ export default function Patients() {
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <select
               value={selectedRisk}
-              onChange={(e) => setSelectedRisk(e.target.value as RiskLevel | 'all')}
+              onChange={(e) =>
+                setSelectedRisk(e.target.value as RiskLevel | "all")
+              }
               className="w-full pl-10 pr-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
             >
               <option value="all">All Risk Levels</option>
@@ -122,8 +140,10 @@ export default function Patients() {
               className="w-full pl-10 pr-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
             >
               <option value="all">All Diagnoses</option>
-              {diagnoses.map(diagnosis => (
-                <option key={diagnosis} value={diagnosis}>{diagnosis}</option>
+              {diagnoses.map((diagnosis) => (
+                <option key={diagnosis} value={diagnosis}>
+                  {diagnosis}
+                </option>
               ))}
             </select>
           </div>
@@ -142,21 +162,32 @@ export default function Patients() {
                     <ArrowUpDown className="w-4 h-4" />
                   </div>
                 </th>
-                <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Phone</th>
-                <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Diagnosis</th>
-                <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Last Call</th>
+                <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                  Phone
+                </th>
+                <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                  Diagnosis
+                </th>
+                <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                  Last Call
+                </th>
                 <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
                   <div className="flex items-center gap-2">
                     Risk Level
                     <ArrowUpDown className="w-4 h-4" />
                   </div>
                 </th>
-                <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Action</th>
+                <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {filteredPatients.map((patient) => (
-                <tr key={patient.id} className="hover:bg-secondary/30 transition-colors">
+                <tr
+                  key={patient.id}
+                  className="hover:bg-secondary/30 transition-colors"
+                >
                   <td className="px-6 py-4">
                     <div>
                       <div className="text-primary">{patient.name}</div>
@@ -168,15 +199,19 @@ export default function Patients() {
                   <td className="px-6 py-4">
                     <div>
                       <div className="text-sm">{patient.diagnosis}</div>
-                      <div className="text-xs text-muted-foreground">{patient.language}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {patient.language}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {new Date(patient.lastCallDate).toLocaleDateString('en-IN')}
+                    {new Date(patient.lastCallDate).toLocaleDateString("en-IN")}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm capitalize ${getRiskBadgeClass(patient.riskLevel)}`}>
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-sm capitalize ${getRiskBadgeClass(patient.riskLevel)}`}
+                      >
                         {patient.riskLevel}
                       </span>
                       <span className="text-xs text-muted-foreground">
@@ -206,14 +241,19 @@ export default function Patients() {
         )}
       </div>
 
-        {/* Results Count */}
+      {/* Results Count */}
       <div className="mt-4 text-sm text-muted-foreground text-center">
         Showing {filteredPatients.length} of {patients.length} patients
       </div>
 
-      <AddPatientModal 
+      <AddPatientModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSuccess={loadPatients}
+      />
+      <ImportPatientsModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
         onSuccess={loadPatients}
       />
     </div>
