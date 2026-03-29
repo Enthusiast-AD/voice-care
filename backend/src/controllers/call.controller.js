@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
  * @access  Private (Dashboard)
  */
 export const triggerPatientCall = asyncHandler(async (req, res) => {
-  const { patient_id } = req.body;
+  const { patient_id, language } = req.body;
 
   if (!patient_id) {
     throw new ApiError(400, "patient_id is required to trigger a call");
@@ -35,7 +35,7 @@ export const triggerPatientCall = asyncHandler(async (req, res) => {
   // 2. Trigger Twilio Call
   let callResult;
   try {
-     callResult = await makeOutboundCall(patient.phone_number, patient_id);
+     callResult = await makeOutboundCall(patient.phone_number, patient_id, language);
   } catch (twilioErr) {
      throw new ApiError(500, "Failed to connect to Twilio to make outbound call", [twilioErr.message]);
   }

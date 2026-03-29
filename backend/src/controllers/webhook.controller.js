@@ -129,7 +129,7 @@ export const handleUltravoxWebhook = asyncHandler(async (req, res) => {
  * @route   POST /api/webhooks/twilio/twiml
  */
 export const handleTwilioTwiML = asyncHandler(async (req, res) => {
-  const { patient_id } = req.query;
+  const { patient_id, language } = req.query;
   const CallSid = req.body.CallSid || req.query.CallSid;
   console.log(
     `[Twilio Webhook] Received TwiML request for patient: ${patient_id}, CallSid: ${CallSid}`,
@@ -152,13 +152,20 @@ export const handleTwilioTwiML = asyncHandler(async (req, res) => {
       return res.send(twiml.toString());
     }
 
+    // Construct the enriched patient object for dynamic prompt
+    const ultravoxPatient = {
+      id: patient.id,
+      name: patient.name,
+      diagnosis: patient.primary_diagnosis || "General Health",
+      language: language || patient.language_preference || "English",
+      flowType: patient.flow_type || "Screening",
+    };
+
     // Initialize Ultravox specific to this patient
     const ultravoxData = await createUltravoxCall(
-      patient.name,
-      patient.primary_diagnosis,
-      patient_id,
+      ultravoxPatient,
       CallSid,
-      patient.flow_type || "Screening"
+      ultravoxPatient.flowType
     );
 
     // Output connection Stream to Twilio format

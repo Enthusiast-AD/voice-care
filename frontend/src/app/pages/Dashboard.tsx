@@ -48,7 +48,8 @@ export default function Dashboard() {
                               type: 'abnormal_symptoms',
                               severity: c.risk_classification,
                               message: 'High risk classified after call',
-                              timestamp: c.created_at
+                              timestamp: c.created_at,
+                              symptoms: Array.isArray(c.symptoms) ? c.symptoms : []
                             }));
 
   const criticalCount = patients.filter(p => p.riskLevel === 'critical').length;
