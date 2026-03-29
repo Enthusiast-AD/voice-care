@@ -254,7 +254,7 @@ export const mockDoctors: Doctor[] = [
 ];
 
 export const getRiskColor = (level: RiskLevel): string => {
-  switch (level) {
+  switch (level?.toLowerCase()) {
     case "low":
       return "text-green-600";
     case "medium":
@@ -263,11 +263,13 @@ export const getRiskColor = (level: RiskLevel): string => {
       return "text-orange-600";
     case "critical":
       return "text-red-600";
+    default:
+      return "text-gray-600";
   }
 };
 
 export const getRiskBgColor = (level: RiskLevel): string => {
-  switch (level) {
+  switch (level?.toLowerCase()) {
     case "low":
       return "bg-green-100";
     case "medium":
@@ -276,6 +278,8 @@ export const getRiskBgColor = (level: RiskLevel): string => {
       return "bg-orange-100";
     case "critical":
       return "bg-red-100";
+    default:
+      return "bg-gray-100";
   }
 };
 

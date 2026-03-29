@@ -26,7 +26,12 @@ export default function Dashboard() {
           assignedDoctorId: 'N/A',
           lastCallDate: p.created_at,
           riskLevel: (p.call_logs && p.call_logs.length > 0 && p.call_logs[0].risk_classification) ? p.call_logs[0].risk_classification.toLowerCase() : 'low',
-          riskScore: 0.1,
+          riskScore: (p.call_logs && p.call_logs.length > 0 && p.call_logs[0].risk_classification)
+            ? (p.call_logs[0].risk_classification.toLowerCase() === 'critical' ? 0.95 
+             : p.call_logs[0].risk_classification.toLowerCase() === 'high' ? 0.85 
+             : p.call_logs[0].risk_classification.toLowerCase() === 'medium' ? 0.60 
+             : 0.30)
+            : 0.30,
         }));
         setPatients(realPatients);
       } catch (err) {

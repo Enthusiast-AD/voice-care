@@ -5,11 +5,15 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
  * Ensure GEMINI_API_KEY is configured in .env.
  */
 export const extractStructuredTranscript = async (rawTranscript) => {
+  if (!rawTranscript || rawTranscript.trim() === "") {
+    return null;
+  }
+  
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.warn("No Gemini API Key found, returning dummy structured transcript");
-      return generateDummyStructuredData(rawTranscript);
+      console.warn("No Gemini API Key found, returning null structured transcript");
+      return null;
     }
     
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -36,7 +40,7 @@ Return the output STRICTLY as raw JSON. Do not write markdown blocks (\`\`\`json
     return JSON.parse(cleanJson);
   } catch (error) {
     console.error("LLM Extraction Error (Gemini):", error.message);
-    return generateDummyStructuredData(rawTranscript);
+    return null;
   }
 };
 
