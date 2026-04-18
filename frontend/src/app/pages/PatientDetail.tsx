@@ -1,12 +1,28 @@
-import { useParams, Link } from 'react-router';
-import { toast } from 'sonner';
-import { ArrowLeft, Phone, Calendar, Languages, AlertCircle, FileText, Activity } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getRiskBadgeClass, getRiskColor } from '../data/mockData';
-import { usePatients } from '../data/usePatients';
-import { useCalls } from '../data/useCalls';
-import { useState } from 'react';
-import { fetchWithAuth } from '../../lib/api';
+import { useParams, Link } from "react-router";
+import { toast } from "sonner";
+import {
+  ArrowLeft,
+  Phone,
+  Calendar,
+  Languages,
+  AlertCircle,
+  FileText,
+  Activity,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { getRiskBadgeClass, getRiskColor } from "../data/mockData";
+import { usePatients } from "../data/usePatients";
+import { useCalls } from "../data/useCalls";
+import { useState } from "react";
+import { fetchWithAuth } from "../../lib/api";
 
 export default function PatientDetail() {
   const { id } = useParams<{ id: string }>();
@@ -15,18 +31,21 @@ export default function PatientDetail() {
   const [triggering, setTriggering] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
 
-  const patient = patients.find(p => p.id === id);
-  const callHistory = calls.filter(c => c.patient_id === id);
+  const patient = patients.find((p) => p.id === id);
+  const callHistory = calls.filter((c) => c.patient_id === id);
 
   const handleCallNow = async () => {
     try {
       setTriggering(true);
-      await fetchWithAuth('/calls/trigger', {
-        method: 'POST',
-        body: JSON.stringify({ patient_id: patient?.id, language: selectedLanguage })
+      await fetchWithAuth("/calls/trigger", {
+        method: "POST",
+        body: JSON.stringify({
+          patient_id: patient?.id,
+          language: selectedLanguage,
+        }),
       });
-      toast.success('Call triggered successfully!');
-    } catch(err: any) {
+      toast.success("Call triggered successfully!");
+    } catch (err: any) {
       toast.error(`Failed to trigger call: ${err.message}`);
     } finally {
       setTriggering(false);
@@ -34,7 +53,11 @@ export default function PatientDetail() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-muted-foreground">Loading patient...</div>;
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        Loading patient...
+      </div>
+    );
   }
 
   if (!patient) {
@@ -42,7 +65,10 @@ export default function PatientDetail() {
       <div className="p-8">
         <div className="bg-card p-12 rounded-xl shadow-md border border-border text-center">
           <p className="text-muted-foreground">Patient not found</p>
-          <Link to="/dashboard/patients" className="text-primary hover:underline mt-4 inline-block">
+          <Link
+            to="/dashboard/patients"
+            className="text-primary hover:underline mt-4 inline-block"
+          >
             Back to Patients
           </Link>
         </div>
@@ -52,16 +78,16 @@ export default function PatientDetail() {
 
   // Mock risk history data
   const riskHistory = [
-    { day: 'Day 1', score: 0.3 },
-    { day: 'Day 3', score: 0.55 },
-    { day: 'Day 5', score: 0.72 },
-    { day: 'Day 7', score: patient.riskScore },
+    { day: "Day 1", score: 0.3 },
+    { day: "Day 3", score: 0.55 },
+    { day: "Day 5", score: 0.72 },
+    { day: "Day 7", score: patient.riskScore },
   ];
 
   return (
     <div className="p-8">
       {/* Back Button */}
-      <Link 
+      <Link
         to="/dashboard/patients"
         className="inline-flex items-center gap-2 text-primary hover:underline mb-6"
       >
@@ -74,10 +100,17 @@ export default function PatientDetail() {
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-6">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl text-primary">
-              {patient.name ? patient.name.split(' ').map(n => n[0]).join('') : '?'}
+              {patient.name
+                ? patient.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                : "?"}
             </div>
             <div>
-              <h1 className="text-3xl mb-2 text-primary">{patient.name || 'Unknown'}</h1>
+              <h1 className="text-3xl mb-2 text-primary">
+                {patient.name || "Unknown"}
+              </h1>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Phone className="w-4 h-4" />
@@ -92,13 +125,16 @@ export default function PatientDetail() {
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <AlertCircle className="w-4 h-4" />
-                  Discharge: {new Date(patient.dischargeDate).toLocaleDateString('en-IN')}
+                  Discharge:{" "}
+                  {new Date(patient.dischargeDate).toLocaleDateString("en-IN")}
                 </div>
               </div>
             </div>
           </div>
           <div className="flex flex-col items-end gap-3">
-            <div className={`px-4 py-2 rounded-full ${getRiskBadgeClass(patient.riskLevel)} text-lg capitalize`}>
+            <div
+              className={`px-4 py-2 rounded-full ${getRiskBadgeClass(patient.riskLevel)} text-lg capitalize`}
+            >
               {patient.riskLevel} Risk
             </div>
             <div className="flex items-center gap-2 mt-2">
@@ -113,7 +149,7 @@ export default function PatientDetail() {
                 <option value="French">French</option>
                 <option value="Bengali">Bengali</option>
               </select>
-              <button 
+              <button
                 onClick={handleCallNow}
                 disabled={triggering}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -131,10 +167,14 @@ export default function PatientDetail() {
         <div className="bg-card p-6 rounded-xl shadow-md border border-border">
           <h3 className="text-sm text-muted-foreground mb-2">Diagnosis</h3>
           <p className="text-xl text-primary">{patient.diagnosis}</p>
-          <p className="text-xs text-muted-foreground mt-1">{patient.diagnosisCode}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {patient.diagnosisCode}
+          </p>
         </div>
         <div className="bg-card p-6 rounded-xl shadow-md border border-border">
-          <h3 className="text-sm text-muted-foreground mb-2">Current Risk Score</h3>
+          <h3 className="text-sm text-muted-foreground mb-2">
+            Current Risk Score
+          </h3>
           <p className={`text-3xl ${getRiskColor(patient.riskLevel)}`}>
             {(patient.riskScore * 100).toFixed(0)}%
           </p>
@@ -143,7 +183,9 @@ export default function PatientDetail() {
         <div className="bg-card p-6 rounded-xl shadow-md border border-border">
           <h3 className="text-sm text-muted-foreground mb-2">Total Calls</h3>
           <p className="text-3xl text-primary">{callHistory.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">Last: {new Date(patient.lastCallDate).toLocaleDateString('en-IN')}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Last: {new Date(patient.lastCallDate).toLocaleDateString("en-IN")}
+          </p>
         </div>
       </div>
 
@@ -160,9 +202,9 @@ export default function PatientDetail() {
             <YAxis domain={[0, 1]} stroke="#5a7070" />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e0ebe9',
-                borderRadius: '8px'
+                backgroundColor: "#ffffff",
+                border: "1px solid #e0ebe9",
+                borderRadius: "8px",
               }}
               formatter={(value: number) => `${(value * 100).toFixed(0)}%`}
             />
@@ -171,7 +213,7 @@ export default function PatientDetail() {
               dataKey="score"
               stroke="#0d6e6e"
               strokeWidth={3}
-              dot={{ fill: '#0d6e6e', r: 5 }}
+              dot={{ fill: "#0d6e6e", r: 5 }}
               activeDot={{ r: 7 }}
             />
           </LineChart>
@@ -194,64 +236,111 @@ export default function PatientDetail() {
                   </div>
                   <div>
                     <p className="text-primary">
-                      {new Date(call.created_at || call.started_at || new Date()).toLocaleDateString('en-IN', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                      {new Date(
+                        call.created_at || call.started_at || new Date(),
+                      ).toLocaleDateString("en-IN", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </p>
-                    <p className="text-sm text-muted-foreground">Duration: {call.duration || 'N/A'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Duration: {call.duration || "N/A"}
+                    </p>
                   </div>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-sm capitalize ${getRiskBadgeClass(call.risk_classification || call.riskLevel || 'low')}`}>
-                  {call.risk_classification || call.riskLevel || 'Low'}
+                <div
+                  className={`px-3 py-1 rounded-full text-sm capitalize ${getRiskBadgeClass(call.risk_classification || call.riskLevel || "low")}`}
+                >
+                  {call.risk_classification || call.riskLevel || "Low"}
                 </div>
               </div>
-              
+
               <div className="mb-3">
-                <h4 className="text-sm mb-2 text-muted-foreground">Symptoms Reported:</h4>
+                <h4 className="text-sm mb-2 text-muted-foreground">
+                  Symptoms Reported:
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {(() => {
                     let symps = call.symptoms;
-                    if (typeof symps === 'string') {
-                      try { symps = JSON.parse(symps); } catch(e) {}
+                    if (typeof symps === "string") {
+                      try {
+                        symps = JSON.parse(symps);
+                      } catch (e) {}
                     }
                     if (Array.isArray(symps) && symps.length > 0) {
                       return symps.map((symptom: string, idx: number) => (
-                        <span key={idx} className="bg-secondary px-3 py-1 rounded-full text-sm">
+                        <span
+                          key={idx}
+                          className="bg-secondary px-3 py-1 rounded-full text-sm"
+                        >
                           {symptom}
                         </span>
                       ));
-                    } else if (typeof symps === 'string' && symps.trim() !== '' && symps !== '[]' && symps !== '{}') {
-                      return <span className="bg-secondary px-3 py-1 rounded-full text-sm">{symps}</span>;
-                    } else if (typeof symps === 'object' && symps !== null && Object.keys(symps).length > 0) {
-                      return Object.values(symps).map((symptom: any, idx: number) => (
-                        <span key={idx} className="bg-secondary px-3 py-1 rounded-full text-sm">
-                          {String(symptom)}
+                    } else if (
+                      typeof symps === "string" &&
+                      symps.trim() !== "" &&
+                      symps !== "[]" &&
+                      symps !== "{}"
+                    ) {
+                      return (
+                        <span className="bg-secondary px-3 py-1 rounded-full text-sm">
+                          {symps}
                         </span>
-                      ));
+                      );
+                    } else if (
+                      typeof symps === "object" &&
+                      symps !== null &&
+                      Object.keys(symps).length > 0
+                    ) {
+                      return Object.values(symps).map(
+                        (symptom: any, idx: number) => (
+                          <span
+                            key={idx}
+                            className="bg-secondary px-3 py-1 rounded-full text-sm"
+                          >
+                            {String(symptom)}
+                          </span>
+                        ),
+                      );
                     }
-                    return <span className="text-sm text-muted-foreground italic">No symptoms reported</span>;
+                    return (
+                      <span className="text-sm text-muted-foreground italic">
+                        No symptoms reported
+                      </span>
+                    );
                   })()}
                 </div>
               </div>
 
-              {call.structured_transcript && typeof call.structured_transcript === 'object' && call.structured_transcript !== null && !Array.isArray(call.structured_transcript) && Object.keys(call.structured_transcript).length > 0 && (
-                <div className="mb-4 bg-muted/30 p-3 rounded-lg border border-border">
-                  <h4 className="text-sm font-semibold mb-2 text-primary">Structured AI Extraction</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    {Object.entries(call.structured_transcript).map(([key, value]) => (
-                      <div key={key} className="flex flex-col mb-1">
-                        <span className="text-muted-foreground text-xs uppercase tracking-wider">{key.replace(/_/g, ' ')}</span>
-                        <span className="font-medium text-foreground">
-                          {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                        </span>
-                      </div>
-                    ))}
+              {call.structured_transcript &&
+                typeof call.structured_transcript === "object" &&
+                call.structured_transcript !== null &&
+                !Array.isArray(call.structured_transcript) &&
+                Object.keys(call.structured_transcript).length > 0 && (
+                  <div className="mb-4 bg-muted/30 p-3 rounded-lg border border-border">
+                    <h4 className="text-sm font-semibold mb-2 text-primary">
+                      Structured AI Extraction
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      {Object.entries(call.structured_transcript).map(
+                        ([key, value]) => (
+                          <div key={key} className="flex flex-col mb-1">
+                            <span className="text-muted-foreground text-xs uppercase tracking-wider">
+                              {key.replace(/_/g, " ")}
+                            </span>
+                            <span className="font-medium text-foreground">
+                              {typeof value === "object"
+                                ? JSON.stringify(value)
+                                : String(value)}
+                            </span>
+                          </div>
+                        ),
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {call.transcript && (
                 <details className="mt-3">
@@ -260,7 +349,9 @@ export default function PatientDetail() {
                     View Full Transcript
                   </summary>
                   <div className="mt-3 p-4 bg-secondary/30 rounded-lg text-sm text-muted-foreground whitespace-pre-wrap">
-                    {typeof call.transcript === 'string' ? call.transcript : JSON.stringify(call.transcript)}
+                    {typeof call.transcript === "string"
+                      ? call.transcript
+                      : JSON.stringify(call.transcript)}
                   </div>
                 </details>
               )}
